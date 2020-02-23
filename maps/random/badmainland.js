@@ -107,13 +107,13 @@ function arcVariation(angle, percent, canOffset = true) {
   return offset + randFloat(angle - variation, angle + variation);
 }
 
-function arcPlacing(playerIndex, object, tileClass, constraints, radius, radiusVariation, angleVariation, retries = 10) {
+function arcPlacing(playerIndex, object, tileClass, constraints, radius, radiusVariation, angleVariation, retries = 30, canOffset = true) {
   const placeFunc = function() {
     const playerPosition = playerPositions[playerIndex];
     const angle = playerAngles[playerIndex];
 
     const calculatedRadius = randIntInclusive(radius - radiusVariation, radius + radiusVariation);
-    const calculatedAngle = arcVariation(angle, angleVariation);
+    const calculatedAngle = arcVariation(angle, angleVariation, canOffset);
 
     const position = Vector2D.add(playerPosition, new Vector2D(calculatedRadius, 0).rotate(-calculatedAngle)).round();
 
@@ -130,25 +130,25 @@ for (let i = 0; i < numPlayers; ++i)
   arcPlacing(
     i, new SimpleObject(oStoneLarge, 1, 1, 0, 4, 0, 2 * Math.PI, 4),
     clRock, avoidClasses(clForest, 10, clHill, 1),
-    42, 2, 7, 30
+    42, 2, 7, 50
   );
 
   arcPlacing(
     i, new SimpleObject(oMetalLarge, 1, 1, 0, 4),
     clMetal, avoidClasses(clForest, 10, clHill, 1, clRock, 5),
-    42, 2, 7, 30
+    42, 2, 7, 50
   );
 
   arcPlacing(
     i, new SimpleObject(oMainHuntableAnimal, 5, 5, 0, 4),
     clFood, avoidClasses(clForest, 4, clHill, 1, clMetal, 4, clRock, 4, clFood, 20),
-    40, 2, 15, false
+    40, 2, 15, 50, false
   );
 
   arcPlacing(
     i, new SimpleObject(oFruitBush, 5, 5, 0, 4),
     clFood, avoidClasses(clForest, 4, clHill, 1, clMetal, 4, clRock, 4, clFood, 10),
-    27, 2, 10, false
+    27, 2, 10, 50, false
   );
 }
 
