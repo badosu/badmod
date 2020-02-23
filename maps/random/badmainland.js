@@ -121,7 +121,7 @@ createMines(
 	[
 		[new SimpleObject(oStoneLarge, 1, 1, 0, 4, 0, 2 * Math.PI, 4)]
 	],
-	avoidClasses(clForest, 1, clPlayer, 47, clRock, 22, clHill, 1),
+	avoidClasses(clForest, 1, clPlayer, 35, clRock, 22, clHill, 1),
 	clRock
   )
 ;
@@ -131,7 +131,7 @@ createMines(
  [
   [new SimpleObject(oMetalLarge, 1,1, 0,4)]
  ],
- avoidClasses(clForest, 1, clPlayer, 47, clMetal, 22, clRock, 5, clHill, 1),
+ avoidClasses(clForest, 1, clPlayer, 35, clMetal, 22, clRock, 5, clHill, 1),
  clMetal
 );
 
