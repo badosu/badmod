@@ -130,7 +130,7 @@ for (let i = 0; i < numPlayers; ++i)
   arcPlacing(
     i, new SimpleObject(oStoneLarge, 1, 1, 0, 4, 0, 2 * Math.PI, 4),
     clRock, avoidClasses(clForest, 10, clHill, 1),
-    42, 2, 7, 50
+    42, 2, 10, 50
   );
 
   arcPlacing(
