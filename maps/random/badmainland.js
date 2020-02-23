@@ -53,8 +53,10 @@ var clMetal = g_Map.createTileClass();
 var clFood = g_Map.createTileClass();
 var clBaseResource = g_Map.createTileClass();
 
+var playerPlacements = playerPlacementCircle(fractionToTiles(0.35));
+
 placePlayerBases({
-	"PlayerPlacement": playerPlacementCircle(fractionToTiles(0.35)),
+	"PlayerPlacement": playerPlacements,
 	"PlayerTileClass": clPlayer,
 	"BaseResourceClass": clBaseResource,
 	"CityPatch": {
@@ -84,10 +86,73 @@ Engine.SetProgress(20);
 
 createBumps(avoidClasses(clPlayer, 20));
 
-if (randBool())
-	createHills([tCliff, tCliff, tHill], avoidClasses(clPlayer, 20, clHill, 15), clHill, scaleByMapSize(3, 15));
-else
-	createMountains(tCliff, avoidClasses(clPlayer, 20, clHill, 15), clHill, scaleByMapSize(3, 15));
+Engine.SetProgress(25);
+
+//if (randBool())
+//	createHills([tCliff, tCliff, tHill], avoidClasses(clPlayer, 20, clHill, 15), clHill, scaleByMapSize(3, 15));
+//else
+//	createMountains(tCliff, avoidClasses(clPlayer, 20, clHill, 15), clHill, scaleByMapSize(3, 15));
+
+var [playersOrder, playerPositions, playerAngles] = playerPlacements;
+
+function arcVariation(angle, percent, canOffset = true) {
+  const isMediumOrLarger = g_Map.getSize() > 192;
+  const variation = 2 * Math.PI * percent / 100;
+  var offset = -Math.PI;
+
+  if (canOffset && numPlayers > 2 && isMediumOrLarger && randBool()) {
+    offset = 0;
+  }
+
+  return offset + randFloat(angle - variation, angle + variation);
+}
+
+function arcPlacing(playerIndex, object, tileClass, constraints, radius, radiusVariation, angleVariation, retries = 10) {
+  const placeFunc = function() {
+    const playerPosition = playerPositions[playerIndex];
+    const angle = playerAngles[playerIndex];
+
+    const calculatedRadius = randIntInclusive(radius - radiusVariation, radius + radiusVariation);
+    const calculatedAngle = arcVariation(angle, angleVariation);
+
+    const position = Vector2D.add(playerPosition, new Vector2D(calculatedRadius, 0).rotate(-calculatedAngle)).round();
+
+    const group = new SimpleGroup([object], true, tileClass, position);
+
+    return group.place(0, new AndConstraint(constraints));
+  };
+
+  retryPlacing(placeFunc, retries, 1, true);
+}
+
+for (let i = 0; i < numPlayers; ++i)
+{
+  arcPlacing(
+    i, new SimpleObject(oStoneLarge, 1, 1, 0, 4, 0, 2 * Math.PI, 4),
+    clRock, avoidClasses(clForest, 10, clHill, 1),
+    42, 2, 7, 30
+  );
+
+  arcPlacing(
+    i, new SimpleObject(oMetalLarge, 1, 1, 0, 4),
+    clMetal, avoidClasses(clForest, 10, clHill, 1, clRock, 5),
+    42, 2, 7, 30
+  );
+
+  arcPlacing(
+    i, new SimpleObject(oMainHuntableAnimal, 5, 5, 0, 4),
+    clFood, avoidClasses(clForest, 4, clHill, 1, clMetal, 4, clRock, 4, clFood, 20),
+    40, 2, 15, false
+  );
+
+  arcPlacing(
+    i, new SimpleObject(oFruitBush, 5, 5, 0, 4),
+    clFood, avoidClasses(clForest, 4, clHill, 1, clMetal, 4, clRock, 4, clFood, 10),
+    27, 2, 10, false
+  );
+}
+
+Engine.SetProgress(40);
 
 var [forestTrees, stragglerTrees] = getTreeCounts(...rBiomeTreeCount(1));
 createForests(
@@ -121,18 +186,20 @@ createMines(
 	[
 		[new SimpleObject(oStoneLarge, 1, 1, 0, 4, 0, 2 * Math.PI, 4)]
 	],
-	avoidClasses(clForest, 1, clPlayer, 35, clRock, 22, clHill, 1),
-	clRock
-  )
-;
+	avoidClasses(clForest, 1, clPlayer, 60, clRock, 22, clHill, 1),
+	clRock,
+  scaleByMapSize(4, 16) - 1
+);
+Engine.SetProgress(60);
 
 g_Map.log("Creating metal mines");
 createMines(
  [
-  [new SimpleObject(oMetalLarge, 1,1, 0,4)]
+  [new SimpleObject(oMetalLarge, 1, 1, 0, 4)]
  ],
- avoidClasses(clForest, 1, clPlayer, 35, clMetal, 22, clRock, 5, clHill, 1),
- clMetal
+ avoidClasses(clForest, 1, clPlayer, 60, clMetal, 22, clRock, 5, clHill, 1),
+ clMetal,
+ scaleByMapSize(4, 16) - 1
 );
 
 Engine.SetProgress(65);
@@ -167,10 +234,10 @@ createFood(
 		[new SimpleObject(oSecondaryHuntableAnimal, 2, 3, 0, 2)]
 	],
 	[
-		3 * numPlayers,
-		3 * numPlayers
+		2 * numPlayers,
+		2 * numPlayers
 	],
-	avoidClasses(clForest, 0, clPlayer, 20, clHill, 1, clMetal, 4, clRock, 4, clFood, 20),
+	avoidClasses(clForest, 0, clPlayer, 60, clHill, 1, clMetal, 4, clRock, 4, clFood, 20),
 	clFood);
 
 Engine.SetProgress(75);
@@ -180,9 +247,9 @@ createFood(
 		[new SimpleObject(oFruitBush, 5, 7, 0, 4)]
 	],
 	[
-		3 * numPlayers
+		2 * numPlayers
 	],
-	avoidClasses(clForest, 0, clPlayer, 20, clHill, 1, clMetal, 4, clRock, 4, clFood, 10),
+	avoidClasses(clForest, 0, clPlayer, 60, clHill, 1, clMetal, 4, clRock, 4, clFood, 10),
 	clFood);
 
 Engine.SetProgress(85);
