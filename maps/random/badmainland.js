@@ -142,12 +142,12 @@ for (let i = 0; i < numPlayers; ++i)
   arcPlacing(
     i, new SimpleObject(oMainHuntableAnimal, 5, 5, 0, 4),
     clFood, avoidClasses(clForest, 4, clHill, 1, clMetal, 4, clRock, 4, clFood, 20),
-    42, 2, 15, 50, false
+    48, 2, 15, 50, false
   );
 
   arcPlacing(
     i, new SimpleObject(oFruitBush, 5, 5, 0, 4),
-    clFood, avoidClasses(clForest, 4, clHill, 1, clMetal, 4, clRock, 4, clFood, 10),
+    clFood, avoidClasses(clForest, 10, clHill, 1, clMetal, 4, clRock, 4, clFood, 10),
     30, 2, 10, 50, false
   );
 }
