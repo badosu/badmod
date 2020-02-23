@@ -88,10 +88,10 @@ createBumps(avoidClasses(clPlayer, 20));
 
 Engine.SetProgress(25);
 
-//if (randBool())
-//	createHills([tCliff, tCliff, tHill], avoidClasses(clPlayer, 20, clHill, 15), clHill, scaleByMapSize(3, 15));
-//else
-//	createMountains(tCliff, avoidClasses(clPlayer, 20, clHill, 15), clHill, scaleByMapSize(3, 15));
+if (randBool())
+  createHills([tCliff, tCliff, tHill], avoidClasses(clPlayer, 60, clHill, 15), clHill, scaleByMapSize(3, 15));
+else
+  createMountains(tCliff, avoidClasses(clPlayer, 60, clHill, 15), clHill, scaleByMapSize(3, 15));
 
 var [playersOrder, playerPositions, playerAngles] = playerPlacements;
 
