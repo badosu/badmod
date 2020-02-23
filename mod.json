@@ -1,0 +1,9 @@
+{
+	"name": "badmod",
+	"version": "0.0.1",
+	"label": "Balanced maps",
+	"description": "A collection of maps made by players and fans of 0 A.D. and shared publicly.",
+	"dependencies": ["0ad=0.0.23"],
+	"url": "https://github.com/cwrtl/community_maps",
+	"type": "maps"
+}
