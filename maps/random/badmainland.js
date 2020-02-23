@@ -256,7 +256,7 @@ Engine.SetProgress(85);
 
 createStragglerTrees(
 	[oTree1, oTree2, oTree4, oTree3],
-	avoidClasses(clForest, 8, clHill, 1, clPlayer, 12, clMetal, 6, clRock, 6, clFood, 1),
+	avoidClasses(clForest, 8, clHill, 1, clPlayer, 38, clMetal, 6, clRock, 6, clFood, 1),
 	clForest,
 	stragglerTrees);
 
