@@ -142,13 +142,13 @@ for (let i = 0; i < numPlayers; ++i)
   arcPlacing(
     i, new SimpleObject(oMainHuntableAnimal, 5, 5, 0, 4),
     clFood, avoidClasses(clForest, 4, clHill, 1, clMetal, 4, clRock, 4, clFood, 20),
-    40, 2, 15, 50, false
+    42, 2, 15, 50, false
   );
 
   arcPlacing(
     i, new SimpleObject(oFruitBush, 5, 5, 0, 4),
     clFood, avoidClasses(clForest, 4, clHill, 1, clMetal, 4, clRock, 4, clFood, 10),
-    27, 2, 10, 50, false
+    30, 2, 10, 50, false
   );
 }
 
@@ -237,7 +237,7 @@ createFood(
 		2 * numPlayers,
 		2 * numPlayers
 	],
-	avoidClasses(clForest, 0, clPlayer, 60, clHill, 1, clMetal, 4, clRock, 4, clFood, 20),
+	avoidClasses(clForest, 0, clPlayer, 50, clHill, 1, clMetal, 4, clRock, 4, clFood, 20),
 	clFood);
 
 Engine.SetProgress(75);
@@ -249,7 +249,7 @@ createFood(
 	[
 		2 * numPlayers
 	],
-	avoidClasses(clForest, 0, clPlayer, 60, clHill, 1, clMetal, 4, clRock, 4, clFood, 10),
+	avoidClasses(clForest, 0, clPlayer, 50, clHill, 1, clMetal, 4, clRock, 4, clFood, 10),
 	clFood);
 
 Engine.SetProgress(85);

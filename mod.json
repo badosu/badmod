@@ -1,6 +1,6 @@
 {
 	"name": "badmod",
-	"version": "0.0.1",
+	"version": "0.0.2",
 	"label": "Balanced maps",
 	"description": "A collection of balanced maps.",
 	"dependencies": ["0ad=0.0.23"],
