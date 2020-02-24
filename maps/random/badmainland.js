@@ -125,30 +125,35 @@ function arcPlacing(playerIndex, object, tileClass, constraints, radius, radiusV
   retryPlacing(placeFunc, retries, 1, true);
 }
 
+const stoneDistance = 42;
+const metalDistance = 42;
+const huntDistance = 48;
+const bushDistance = 30;
+
 for (let i = 0; i < numPlayers; ++i)
 {
   arcPlacing(
     i, new SimpleObject(oStoneLarge, 1, 1, 0, 4, 0, 2 * Math.PI, 4),
     clRock, avoidClasses(clForest, 10, clHill, 1),
-    42, 2, 10, 100
+    stoneDistance, 2, isNomad() ? 100 : 10, 100
   );
 
   arcPlacing(
     i, new SimpleObject(oMetalLarge, 1, 1, 0, 4),
     clMetal, avoidClasses(clForest, 10, clHill, 1, clRock, 5),
-    42, 2, 7, 100
+    metalDistance, 2, isNomad() ? 100 : 7, 100
   );
 
   arcPlacing(
     i, new SimpleObject(oMainHuntableAnimal, 5, 5, 0, 4),
     clFood, avoidClasses(clForest, 4, clHill, 1, clMetal, 4, clRock, 4, clFood, 20),
-    48, 2, 15, 50, false
+    huntDistance, 2, isNomad() ? 100 : 15, 50, false
   );
 
   arcPlacing(
     i, new SimpleObject(oFruitBush, 5, 5, 0, 4),
     clFood, avoidClasses(clForest, 10, clHill, 1, clMetal, 4, clRock, 4, clFood, 10),
-    30, 2, 10, 50, false
+    bushDistance, 2, isNomad() ? 100 : 10, 50, false
   );
 }
 
