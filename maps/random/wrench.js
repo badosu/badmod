@@ -100,10 +100,13 @@ function nearPlacing(object, tileClass, constraints, position, variance) {
   retryPlacing(placeFunc, 150, 1, true);
 }
 
+const minesVariation = randIntInclusive(0, 10);
+
 for (let i = 0; i < numPlayers; ++i) {
   const playerAngle = playerAngles[i];
   const offsetAngle = Math.PI / numPlayers;
-  const minesPoint = new Vector2D(playersCircleRadius + numPlayers * 3.5).rotate(- playerAngle - offsetAngle);
+  const minesRadius = playersCircleRadius + numPlayers * 3.5 + minesVariation;
+  const minesPoint = new Vector2D(minesRadius).rotate(- playerAngle - offsetAngle);
   const minesPosition = Vector2D.add(mapCenter, minesPoint).round();
 
   nearPlacing(
@@ -121,6 +124,18 @@ for (let i = 0; i < numPlayers; ++i) {
     minesPosition,
     4
   );
+
+  const minesClumpPosition = new Vector2D(minesRadius - 14).rotate(- playerAngle - offsetAngle);
+  createArea(
+  	new ClumpPlacer(1000, 0.97, 0.8, Infinity, Vector2D.add(mapCenter, minesClumpPosition).round()),
+    [
+  			new LayeredPainter([tCliff, [tForestFloor1, tForestFloor1, tCliff]], [2]),
+  			new SmoothElevationPainter(ELEVATION_SET, 24, 1),
+  			new TileClassPainter(clHill)
+    ],
+  	avoidClasses(clMetal, 9, clRock, 9)
+  );
+
 
   nearPlacing(
     new SimpleObject(oStoneLarge, 1, 1, 0, 4),
@@ -281,7 +296,7 @@ createFood(
 		2 * numPlayers,
 		2 * numPlayers
 	],
-	avoidClasses(clForest, 0, clPlayer, 50, clHill, 1, clMetal, 4, clRock, 4, clFood, 20),
+	avoidClasses(clForest, 0, clPlayer, 45, clHill, 1, clMetal, 4, clRock, 4, clFood, 20),
 	clFood);
 
 Engine.SetProgress(75);
