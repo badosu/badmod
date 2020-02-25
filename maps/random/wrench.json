@@ -1,0 +1,10 @@
+{
+	"settings" : {
+		"Name" : "Wrench",
+		"Script" : "wrench.js",
+		"Description" : "Players start side by side, protected by mountains. Extra minerals on border.",
+		"Preview" : "mainland_temperate.png",
+		"SupportedBiomes": "generic/",
+		"CircularMap" : true
+	}
+}
