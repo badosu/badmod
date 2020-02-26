@@ -101,7 +101,7 @@ function nearPlacing(object, tileClass, constraints, position, variance) {
   retryPlacing(placeFunc, 500, 1, true);
 }
 
-const minesVariation = randIntInclusive(4, 13);
+const minesVariation = randIntInclusive(2, 12);
 
 for (let i = 0; i < numPlayers; ++i) {
   const playerAngle = playerAngles[i];
@@ -128,7 +128,7 @@ for (let i = 0; i < numPlayers; ++i) {
 
   const minesClumpPosition = new Vector2D(minesRadius - 15).rotate(- playerAngle - offsetAngle);
   createArea(
-  	new ClumpPlacer(1200, 0.97, 0.8, Infinity, Vector2D.add(mapCenter, minesClumpPosition).round()),
+  	new ClumpPlacer(1100, 0.97, 0.8, Infinity, Vector2D.add(mapCenter, minesClumpPosition).round()),
     [
   			new LayeredPainter([tCliff, [tForestFloor1, tForestFloor1, tCliff]], [2]),
   			new SmoothElevationPainter(ELEVATION_SET, 24, 1),
