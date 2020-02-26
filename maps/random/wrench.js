@@ -130,7 +130,7 @@ for (let i = 0; i < numPlayers; ++i) {
   createArea(
   	new ClumpPlacer(1100, 0.97, 0.8, Infinity, Vector2D.add(mapCenter, minesClumpPosition).round()),
     [
-  			new LayeredPainter([tCliff, [tForestFloor1, tForestFloor1, tCliff]], [2]),
+  			new TerrainPainter(tCliff),
   			new SmoothElevationPainter(ELEVATION_SET, 24, 1),
   			new TileClassPainter(clWrenchHead)
     ],
@@ -159,7 +159,7 @@ Engine.SetProgress(25);
 createArea(
 	new ClumpPlacer(2800 + (numPlayers - 2) * 4000, 0.97, 0.8, Infinity, mapCenter),
   [
-			new LayeredPainter([tCliff, [tForestFloor1, tForestFloor1, tCliff]], [2]),
+			new TerrainPainter(tCliff),
 			new SmoothElevationPainter(ELEVATION_SET, 24, 1),
 			new TileClassPainter(clHill)
   ],
@@ -246,7 +246,7 @@ createLayeredPatches(
  [scaleByMapSize(3, 6), scaleByMapSize(5, 10), scaleByMapSize(8, 21)],
  [[tMainTerrain,tTier1Terrain],[tTier1Terrain,tTier2Terrain], [tTier2Terrain,tTier3Terrain]],
  [1, 1],
- avoidClasses(clForest, 0, clHill, 0, clDirt, 5, clPlayer, 12),
+ avoidClasses(clForest, 0, clHill, 0, clDirt, 5, clPlayer, 12, clWrenchHead, 2),
  scaleByMapSize(15, 45),
  clDirt);
 
@@ -254,7 +254,7 @@ g_Map.log("Creating grass patches");
 createPatches(
  [scaleByMapSize(2, 4), scaleByMapSize(3, 7), scaleByMapSize(5, 15)],
  tTier4Terrain,
- avoidClasses(clForest, 0, clHill, 0, clDirt, 5, clPlayer, 12),
+ avoidClasses(clForest, 0, clHill, 0, clDirt, 5, clPlayer, 12, clWrenchHead, 2),
  scaleByMapSize(15, 45),
  clDirt);
 
@@ -284,7 +284,7 @@ createDecoration(
 		planetm * scaleByMapSize(13, 200),
 		planetm * scaleByMapSize(13, 200)
 	],
-	avoidClasses(clForest, 0, clPlayer, 0, clHill, 0));
+	avoidClasses(clForest, 0, clPlayer, 0, clHill, 0, clWrenchHead, 0));
 
 Engine.SetProgress(70);
 
@@ -297,7 +297,7 @@ createFood(
 		2 * numPlayers,
 		2 * numPlayers
 	],
-	avoidClasses(clForest, 0, clPlayer, 45, clHill, 1, clMetal, 4, clRock, 4, clFood, 20),
+	avoidClasses(clForest, 0, clPlayer, 45, clHill, 1, clMetal, 4, clRock, 4, clFood, 20, clWrenchHead, 5),
 	clFood);
 
 Engine.SetProgress(75);
@@ -309,7 +309,7 @@ createFood(
 	[
 		2 * numPlayers
 	],
-	avoidClasses(clForest, 0, clPlayer, 50, clHill, 1, clMetal, 4, clRock, 4, clFood, 10),
+	avoidClasses(clForest, 0, clPlayer, 50, clHill, 1, clMetal, 4, clRock, 4, clFood, 10, clWrenchHead, 10),
 	clFood);
 
 Engine.SetProgress(85);
@@ -319,11 +319,11 @@ createStragglerTrees(
 	avoidClasses(
     clForest, 8, clHill, 1, clPlayer,
     currentBiome() === "generic/savanna" ? 12 : 38,
-    clMetal, 6, clRock, 6, clFood, 1
+    clMetal, 6, clRock, 6, clFood, 1, clWrenchHead, 10
   ),
 	clForest,
 	stragglerTrees);
 
-placePlayersNomad(clPlayer, avoidClasses(clForest, 1, clMetal, 4, clRock, 4, clHill, 4, clFood, 2));
+placePlayersNomad(clPlayer, avoidClasses(clForest, 1, clMetal, 4, clRock, 4, clHill, 4, clFood, 2, clWrenchHead, 10));
 
 g_Map.ExportMap();
