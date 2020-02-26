@@ -46,6 +46,7 @@ const numPlayers = getNumPlayers();
 
 var clPlayer = g_Map.createTileClass();
 var clHill = g_Map.createTileClass();
+var clWrenchHead = g_Map.createTileClass();
 var clForest = g_Map.createTileClass();
 var clDirt = g_Map.createTileClass();
 var clRock = g_Map.createTileClass();
@@ -131,7 +132,7 @@ for (let i = 0; i < numPlayers; ++i) {
     [
   			new LayeredPainter([tCliff, [tForestFloor1, tForestFloor1, tCliff]], [2]),
   			new SmoothElevationPainter(ELEVATION_SET, 24, 1),
-  			new TileClassPainter(clHill)
+  			new TileClassPainter(clWrenchHead)
     ],
   	avoidClasses(clPlayer, 18, clMetal, 9, clRock, 9)
   );
@@ -166,11 +167,6 @@ createArea(
 );
 
 createBumps(avoidClasses(clPlayer, 20, clMetal, 6, clRock, 6));
-
-if (randBool())
-  createHills([tCliff, tCliff, tHill], avoidClasses(clPlayer, 35, clHill, 15, clMetal, 10, clRock, 10), clHill, scaleByMapSize(2, 11));
-else
-  createMountains(tCliff, avoidClasses(clPlayer, 35, clHill, 15, clMetal, 10, clRock, 10), clHill, scaleByMapSize(2, 11));
 
 
 function arcVariation(angle, percent) {
@@ -229,12 +225,17 @@ for (let i = 0; i < numPlayers; ++i)
 
 Engine.SetProgress(40);
 
+if (randBool())
+  createHills([tCliff, tCliff, tHill], avoidClasses(clPlayer, 35, clHill, 15, clMetal, 10, clRock, 10, clWrenchHead, 20), clHill, scaleByMapSize(2, 11));
+else
+  createMountains(tCliff, avoidClasses(clPlayer, 35, clHill, 15, clMetal, 10, clRock, 10, clWrenchHead, 20), clHill, scaleByMapSize(2, 11));
+
 const forestMultiplier = g_Map.getSize() > 192 ? 1 : 1.4;
 const [forestTrees, stragglerTrees] = getTreeCounts(...rBiomeTreeCount(forestMultiplier));
 
 createForests(
  [tMainTerrain, tForestFloor1, tForestFloor2, pForest1, pForest2],
- avoidClasses(clPlayer, 20, clForest, 15, clHill, 0, clMetal, 6, clRock, 6, clFood, 6),
+ avoidClasses(clPlayer, 20, clForest, 15, clHill, 0, clMetal, 6, clRock, 6, clFood, 6, clWrenchHead, 10),
  clForest,
  forestTrees);
 
