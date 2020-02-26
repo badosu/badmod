@@ -48,6 +48,7 @@ var clPlayer = g_Map.createTileClass();
 var clHill = g_Map.createTileClass();
 var clForest = g_Map.createTileClass();
 var clDirt = g_Map.createTileClass();
+var clExtraBush = g_Map.createTileClass();
 var clRock = g_Map.createTileClass();
 var clMetal = g_Map.createTileClass();
 var clFood = g_Map.createTileClass();
@@ -134,25 +135,25 @@ for (let i = 0; i < numPlayers; ++i)
 {
   arcPlacing(
     i, new SimpleObject(oStoneLarge, 1, 1, 0, 4, 0, 2 * Math.PI, 4),
-    clRock, avoidClasses(clForest, 10, clHill, 1),
+    clRock, avoidClasses(clForest, 10, clHill, 2),
     stoneDistance, 2, isNomad() ? 100 : 10, 100
   );
 
   arcPlacing(
     i, new SimpleObject(oMetalLarge, 1, 1, 0, 4),
-    clMetal, avoidClasses(clForest, 10, clHill, 1, clRock, 5),
+    clMetal, avoidClasses(clForest, 10, clHill, 2, clRock, 5),
     metalDistance, 2, isNomad() ? 100 : 7, 100
   );
 
   arcPlacing(
     i, new SimpleObject(oMainHuntableAnimal, 5, 5, 0, 4),
-    clFood, avoidClasses(clForest, 4, clHill, 1, clMetal, 4, clRock, 4, clFood, 20),
+    clFood, avoidClasses(clForest, 4, clHill, 2, clMetal, 4, clRock, 4, clFood, 20),
     huntDistance, 2, isNomad() ? 100 : 15, 50, false
   );
 
   arcPlacing(
     i, new SimpleObject(oFruitBush, 5, 5, 0, 4),
-    clFood, avoidClasses(clForest, 10, clHill, 1, clMetal, 4, clRock, 4, clFood, 10),
+    clExtraBush, avoidClasses(clForest, 10, clHill, 2, clMetal, 4, clRock, 4, clFood, 10),
     bushDistance, 2, isNomad() ? 100 : 10, 50, false
   );
 }
@@ -162,7 +163,7 @@ Engine.SetProgress(40);
 var [forestTrees, stragglerTrees] = getTreeCounts(...rBiomeTreeCount(1));
 createForests(
  [tMainTerrain, tForestFloor1, tForestFloor2, pForest1, pForest2],
- avoidClasses(clPlayer, 20, clForest, 18, clHill, 0),
+ avoidClasses(clPlayer, 20, clForest, 18, clHill, 0, clMetal, 4, clRock, 4, clExtraBush, 6),
  clForest,
  forestTrees);
 
