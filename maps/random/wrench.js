@@ -97,10 +97,10 @@ function nearPlacing(object, tileClass, constraints, position, variance) {
     return group.place(0, new AndConstraint(constraints));
   };
 
-  retryPlacing(placeFunc, 150, 1, true);
+  retryPlacing(placeFunc, 500, 1, true);
 }
 
-const minesVariation = randIntInclusive(0, 10);
+const minesVariation = randIntInclusive(4, 13);
 
 for (let i = 0; i < numPlayers; ++i) {
   const playerAngle = playerAngles[i];
@@ -114,26 +114,26 @@ for (let i = 0; i < numPlayers; ++i) {
     clMetal, 
     avoidClasses(clForest, 6, clHill, 7),
     minesPosition,
-    4
+    3
   );
 
   nearPlacing(
     new SimpleObject(oStoneLarge, 1, 1, 0, 4),
     clRock, 
-    avoidClasses(clForest, 6, clHill, 7),
+    avoidClasses(clForest, 6, clHill, 7, clMetal, 4),
     minesPosition,
-    4
+    3
   );
 
-  const minesClumpPosition = new Vector2D(minesRadius - 14).rotate(- playerAngle - offsetAngle);
+  const minesClumpPosition = new Vector2D(minesRadius - 15).rotate(- playerAngle - offsetAngle);
   createArea(
-  	new ClumpPlacer(1000, 0.97, 0.8, Infinity, Vector2D.add(mapCenter, minesClumpPosition).round()),
+  	new ClumpPlacer(1200, 0.97, 0.8, Infinity, Vector2D.add(mapCenter, minesClumpPosition).round()),
     [
   			new LayeredPainter([tCliff, [tForestFloor1, tForestFloor1, tCliff]], [2]),
   			new SmoothElevationPainter(ELEVATION_SET, 24, 1),
   			new TileClassPainter(clHill)
     ],
-  	avoidClasses(clMetal, 9, clRock, 9)
+  	avoidClasses(clPlayer, 18, clMetal, 9, clRock, 9)
   );
 
 
@@ -168,9 +168,9 @@ createArea(
 createBumps(avoidClasses(clPlayer, 20, clMetal, 6, clRock, 6));
 
 if (randBool())
-  createHills([tCliff, tCliff, tHill], avoidClasses(clPlayer, 35, clHill, 15), clHill, scaleByMapSize(2, 11));
+  createHills([tCliff, tCliff, tHill], avoidClasses(clPlayer, 35, clHill, 15, clMetal, 10, clRock, 10), clHill, scaleByMapSize(2, 11));
 else
-  createMountains(tCliff, avoidClasses(clPlayer, 35, clHill, 15), clHill, scaleByMapSize(2, 11));
+  createMountains(tCliff, avoidClasses(clPlayer, 35, clHill, 15, clMetal, 10, clRock, 10), clHill, scaleByMapSize(2, 11));
 
 
 function arcVariation(angle, percent) {
@@ -234,7 +234,7 @@ const [forestTrees, stragglerTrees] = getTreeCounts(...rBiomeTreeCount(forestMul
 
 createForests(
  [tMainTerrain, tForestFloor1, tForestFloor2, pForest1, pForest2],
- avoidClasses(clPlayer, 20, clForest, 15, clHill, 0, clMetal, 6, clRock, 6),
+ avoidClasses(clPlayer, 20, clForest, 15, clHill, 0, clMetal, 6, clRock, 6, clFood, 6),
  clForest,
  forestTrees);
 
