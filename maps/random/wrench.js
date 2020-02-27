@@ -226,9 +226,9 @@ for (let i = 0; i < numPlayers; ++i)
 Engine.SetProgress(40);
 
 if (randBool())
-  createHills([tCliff, tCliff, tHill], avoidClasses(clPlayer, 35, clHill, 15, clMetal, 10, clRock, 10, clWrenchHead, 20), clHill, scaleByMapSize(2, 11));
+  createHills([tCliff, tCliff, tHill], avoidClasses(clPlayer, 35, clHill, 15, clMetal, 10, clRock, 10, clWrenchHead, 20, clFood, 4), clHill, scaleByMapSize(2, 11));
 else
-  createMountains(tCliff, avoidClasses(clPlayer, 35, clHill, 15, clMetal, 10, clRock, 10, clWrenchHead, 20), clHill, scaleByMapSize(2, 11));
+  createMountains(tCliff, avoidClasses(clPlayer, 35, clHill, 15, clMetal, 10, clRock, 10, clWrenchHead, 20, clFood, 4), clHill, scaleByMapSize(2, 11));
 
 const forestMultiplier = g_Map.getSize() > 192 ? 1 : 1.4;
 const [forestTrees, stragglerTrees] = getTreeCounts(...rBiomeTreeCount(forestMultiplier));
