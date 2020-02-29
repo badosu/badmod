@@ -132,8 +132,9 @@ for (let i = 0; i < numPlayers; ++i)
 {
   const playerPosition = playerPositions[i];
   const angle = playerAngles[i];
-  const lakePosition = Vector2D.add(playerPosition, new Vector2D(40, 0).rotate(-angle)).round();
-  const lakeSize = Math.floor(scaleByMapSize(35, 70));
+  const lakeRadius = 40;
+  const lakePosition = Vector2D.add(playerPosition, new Vector2D(lakeRadius, 0).rotate(-angle)).round();
+  const lakeSize = Math.round(scaleByMapSize(35, 70) * 2 / numPlayers);
 
   createArea(
     new ChainPlacer(
@@ -153,20 +154,20 @@ for (let i = 0; i < numPlayers; ++i)
   arcPlacing(
     playerPosition, angle, [new SimpleObject(oFish, 3, 3, 0, 2)],
     clFood, [avoidClasses(clFood, 6), stayClasses(clWater, 4)],
-    38, 2, 2, 1000
+    lakeRadius - 2, 2, 2, 1000
   );
 
   for (let fishIndex = 0; fishIndex < 2; ++fishIndex) {
     arcPlacing(
-      playerPosition, angle - Math.PI / 10, [new SimpleObject(oFish, 2, 2, 0, 2)],
-      clFood, [avoidClasses(clFood, 8), stayClasses(clWater, 4)],
-      46 + fishIndex * 8, 5, 6, 1000
+      playerPosition, angle - Math.PI / 9, [new SimpleObject(oFish, 2, 2, 0, 2)],
+      clFood, [avoidClasses(clFood, 6), stayClasses(clWater, 4)],
+      lakeRadius + 7 + fishIndex * 7, 6, 5, 1000
     );
 
     arcPlacing(
       playerPosition, angle + Math.PI / 10, [new SimpleObject(oFish, 2, 2, 0, 2)],
-      clFood, [avoidClasses(clFood, 8), stayClasses(clWater, 4)],
-      46 + fishIndex * 8, 5, 6, 1000
+      clFood, [avoidClasses(clFood, 6), stayClasses(clWater, 4)],
+      lakeRadius + 7 + fishIndex * 7, 6, 5, 1000
     );
   }
 
@@ -178,7 +179,7 @@ for (let i = 0; i < numPlayers; ++i)
     new ChainPlacer(
     	2,
     	Math.floor(scaleByMapSize(5, 16)),
-    	Math.floor(scaleByMapSize(20, 50)),
+    	Math.round(scaleByMapSize(10, 40) * 2 /numPlayers),
     	Infinity,
     	sideLakePosition,
     	0,
@@ -189,19 +190,20 @@ for (let i = 0; i < numPlayers; ++i)
     ],
     avoidClasses(clPlayer, 25));
 
-  const sideMetalPosition = Vector2D.add(mapCenter, new Vector2D(sideLakeRadius - 48, 0).rotate(-angle - offsetAngle - offsetAngle / 4)).round();
-  const sideStonePosition = Vector2D.add(mapCenter, new Vector2D(sideLakeRadius - 48, 0).rotate(-angle - offsetAngle + offsetAngle / 4)).round();
+  const sideMinesRadius = Math.round((sideLakeRadius - 57) * 2 / numPlayers + scaleByMapSize(0, 30));
+  const sideMetalPosition = Vector2D.add(mapCenter, new Vector2D(sideMinesRadius, 0).rotate(-angle - offsetAngle - offsetAngle / 4)).round();
+  const sideStonePosition = Vector2D.add(mapCenter, new Vector2D(sideMinesRadius, 0).rotate(-angle - offsetAngle + offsetAngle / 4)).round();
 
   nearPlacing(
     new SimpleObject(oStoneLarge, 1, 1, 0, 4, 0, 2 * Math.PI, 4),
-    clRock, [avoidClasses(clForest, 10, clWater, 4)],
-    sideMetalPosition, 4
+    clRock, [avoidClasses(clForest, 10, clWater, 3)],
+    sideMetalPosition, 5
   );
 
   nearPlacing(
     new SimpleObject(oMetalLarge, 1, 1, 0, 4),
-    clMetal, [avoidClasses(clForest, 10, clWater, 4, clRock, 4)],
-    sideStonePosition, 4
+    clMetal, [avoidClasses(clForest, 10, clWater, 3, clRock, 4)],
+    sideStonePosition, 5
   );
 
   for (let fishIndex = 0; fishIndex < 10; ++fishIndex) {
@@ -288,7 +290,7 @@ createMines(
 	[
 		[new SimpleObject(oStoneLarge, 1, 1, 0, 4, 0, 2 * Math.PI, 4)]
 	],
-	avoidClasses(clForest, 1, clPlayer, 60, clRock, 25, clHill, 1, clWater, 10),
+	avoidClasses(clForest, 1, clPlayer, 65, clMetal, 30, clRock, 30, clHill, 1, clWater, 10),
 	clRock,
   scaleByMapSize(4, 16) - 1
 );
@@ -299,7 +301,7 @@ createMines(
  [
   [new SimpleObject(oMetalLarge, 1, 1, 0, 4)]
  ],
- avoidClasses(clForest, 1, clPlayer, 60, clMetal, 25, clRock, 5, clHill, 1, clWater, 10),
+ avoidClasses(clForest, 1, clPlayer, 65, clMetal, 30, clRock, 30, clHill, 1, clWater, 10),
  clMetal,
  scaleByMapSize(4, 16) - 1
 );
