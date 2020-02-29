@@ -60,7 +60,7 @@ var clFood = g_Map.createTileClass();
 var clWater = g_Map.createTileClass();
 var clBaseResource = g_Map.createTileClass();
 
-var playerPlacements = playerPlacementCircle(fractionToTiles(0.25));
+var playerPlacements = playerPlacementCircle(fractionToTiles(0.26));
 const mapCenter = g_Map.getCenter();
 
 function arcVariation(angle, percent) {
@@ -134,7 +134,7 @@ for (let i = 0; i < numPlayers; ++i)
   const angle = playerAngles[i];
   const lakeRadius = 40;
   const lakePosition = Vector2D.add(playerPosition, new Vector2D(lakeRadius, 0).rotate(-angle)).round();
-  const lakeSize = Math.round(scaleByMapSize(35, 70) * 2 / numPlayers);
+  const lakeSize = Math.round(scaleByMapSize(35, 70) * 2 / numPlayers - 2);
 
   createArea(
     new ChainPlacer(
@@ -172,14 +172,30 @@ for (let i = 0; i < numPlayers; ++i)
   }
 
   const offsetAngle = Math.PI / numPlayers;
-  const sideLakeRadius = fractionToTiles(0.5);
+  const sideLakeRadius = fractionToTiles(0.5) - 2;
   const sideLakePosition = Vector2D.add(mapCenter, new Vector2D(sideLakeRadius, 0).rotate(-angle - offsetAngle)).round();
+
+  const sideMinesRadius = Math.round((sideLakeRadius - 40) * 2 / numPlayers + scaleByMapSize(0, 30));
+  const sideMetalPosition = Vector2D.add(mapCenter, new Vector2D(sideMinesRadius, 0).rotate(-angle - offsetAngle - offsetAngle / 4)).round();
+  const sideStonePosition = Vector2D.add(mapCenter, new Vector2D(sideMinesRadius, 0).rotate(-angle - offsetAngle + offsetAngle / 4)).round();
+
+  nearPlacing(
+    new SimpleObject(oStoneLarge, 1, 1, 0, 4, 0, 2 * Math.PI, 4),
+    clRock, [avoidClasses(clForest, 10, clWater, 3)],
+    sideMetalPosition, 2
+  );
+
+  nearPlacing(
+    new SimpleObject(oMetalLarge, 1, 1, 0, 4),
+    clMetal, [avoidClasses(clForest, 10, clWater, 3, clRock, 4)],
+    sideStonePosition, 2
+  );
 
   createArea(
     new ChainPlacer(
     	2,
     	Math.floor(scaleByMapSize(5, 16)),
-    	Math.round(scaleByMapSize(10, 40) * 2 /numPlayers),
+    	Math.round(scaleByMapSize(6, 30) * 2 /numPlayers),
     	Infinity,
     	sideLakePosition,
     	0,
@@ -188,23 +204,7 @@ for (let i = 0; i < numPlayers; ++i)
     	new SmoothElevationPainter(ELEVATION_SET, heightSeaGround, 4),
     	new TileClassPainter(clWater)
     ],
-    avoidClasses(clPlayer, 25));
-
-  const sideMinesRadius = Math.round((sideLakeRadius - 57) * 2 / numPlayers + scaleByMapSize(0, 30));
-  const sideMetalPosition = Vector2D.add(mapCenter, new Vector2D(sideMinesRadius, 0).rotate(-angle - offsetAngle - offsetAngle / 4)).round();
-  const sideStonePosition = Vector2D.add(mapCenter, new Vector2D(sideMinesRadius, 0).rotate(-angle - offsetAngle + offsetAngle / 4)).round();
-
-  nearPlacing(
-    new SimpleObject(oStoneLarge, 1, 1, 0, 4, 0, 2 * Math.PI, 4),
-    clRock, [avoidClasses(clForest, 10, clWater, 3)],
-    sideMetalPosition, 5
-  );
-
-  nearPlacing(
-    new SimpleObject(oMetalLarge, 1, 1, 0, 4),
-    clMetal, [avoidClasses(clForest, 10, clWater, 3, clRock, 4)],
-    sideStonePosition, 5
-  );
+    avoidClasses(clPlayer, 25, clRock, 4, clMetal, 4));
 
   for (let fishIndex = 0; fishIndex < 10; ++fishIndex) {
     const sideFishPosition = Vector2D.add(mapCenter, new Vector2D(sideLakeRadius - 35 + fishIndex, 0).rotate(-angle - offsetAngle)).round();
@@ -258,10 +258,11 @@ else
 
 Engine.SetProgress(40);
 
-var [forestTrees, stragglerTrees] = getTreeCounts(...rBiomeTreeCount(1));
+const forestMultiplier = g_Map.getSize() > 256 ? 1 : 1.4;
+var [forestTrees, stragglerTrees] = getTreeCounts(...rBiomeTreeCount(forestMultiplier));
 createForests(
  [tMainTerrain, tForestFloor1, tForestFloor2, pForest1, pForest2],
- avoidClasses(clPlayer, 20, clForest, 18, clHill, 0, clMetal, 4, clRock, 4, clExtraBush, 6, clWater, 4),
+ avoidClasses(clPlayer, 18, clForest, 15, clHill, 0, clMetal, 4, clRock, 4, clExtraBush, 6, clWater, 4),
  clForest,
  forestTrees);
 
@@ -362,7 +363,7 @@ createStragglerTrees(
 	[oTree1, oTree2, oTree4, oTree3],
 	avoidClasses(
     clForest, 8, clHill, 1, clPlayer,
-    currentBiome() === "generic/savanna" ? 12 : 38,
+    currentBiome() === "generic/savanna" ? 12 : 35,
     clMetal, 6, clRock, 6, clFood, 1, clWater, 4
   ),
 	clForest,
