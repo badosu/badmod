@@ -1,0 +1,6 @@
+- Fix berries on top of hills on balanced hyrcanian shores
+- For hunt on top of hill for wrench tg
+- Balanced mainland no secondary metal
+- Balanced mainland no first hunt when hills present
+- Fix inconsistent fish numbers on cross
+- Consider increasing wood multiplier on wrench and cross medium

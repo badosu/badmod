@@ -48,15 +48,19 @@ var clPlayer = g_Map.createTileClass();
 var clHill = g_Map.createTileClass();
 var clForest = g_Map.createTileClass();
 var clDirt = g_Map.createTileClass();
-var clExtraBush = g_Map.createTileClass();
 var clRock = g_Map.createTileClass();
 var clMetal = g_Map.createTileClass();
 var clFood = g_Map.createTileClass();
 var clBaseResource = g_Map.createTileClass();
 
-var playerPlacements = playerPlacementCircle(fractionToTiles(0.35));
+var playerPlacements = playerPlacementCircle(fractionToTiles(0.30));
 
-placePlayerBases({
+var clPlayers = [];
+for (let i = 0; i < numPlayers; ++i) {
+	clPlayers[i] = g_Map.createTileClass();
+}
+
+placePlayerBasesCustom({
 	"PlayerPlacement": playerPlacements,
 	"PlayerTileClass": clPlayer,
 	"BaseResourceClass": clBaseResource,
@@ -82,12 +86,15 @@ placePlayerBases({
 	"Decoratives": {
 		"template": aGrassShort
 	}
-});
+}, clPlayer, clPlayers);
+
 Engine.SetProgress(20);
 
 createBumps(avoidClasses(clPlayer, 20));
 
 Engine.SetProgress(25);
+
+let biome = currentBiome();
 
 if (randBool())
   createHills([tCliff, tCliff, tHill], avoidClasses(clPlayer, 35, clHill, 15), clHill, scaleByMapSize(2, 11));
@@ -95,36 +102,6 @@ else
   createMountains(tCliff, avoidClasses(clPlayer, 35, clHill, 15), clHill, scaleByMapSize(2, 11));
 
 var [playersOrder, playerPositions, playerAngles] = playerPlacements;
-
-function arcVariation(angle, percent, canOffset = true) {
-  const isMediumOrLarger = g_Map.getSize() > 192;
-  const variation = 2 * Math.PI * percent / 100;
-  var offset = -Math.PI;
-
-  if (canOffset && numPlayers > 2 && isMediumOrLarger && randBool()) {
-    offset = 0;
-  }
-
-  return offset + randFloat(angle - variation, angle + variation);
-}
-
-function arcPlacing(playerIndex, object, tileClass, constraints, radius, radiusVariation, angleVariation, retries = 30, canOffset = true) {
-  const placeFunc = function() {
-    const playerPosition = playerPositions[playerIndex];
-    const angle = playerAngles[playerIndex];
-
-    const calculatedRadius = randIntInclusive(radius - radiusVariation, radius + radiusVariation);
-    const calculatedAngle = arcVariation(angle, angleVariation, canOffset);
-
-    const position = Vector2D.add(playerPosition, new Vector2D(calculatedRadius, 0).rotate(-calculatedAngle)).round();
-
-    const group = new SimpleGroup([object], true, tileClass, position);
-
-    return group.place(0, new AndConstraint(constraints));
-  };
-
-  retryPlacing(placeFunc, retries, 1, true);
-}
 
 const stoneDistance = 42;
 const metalDistance = 42;
@@ -136,34 +113,26 @@ for (let i = 0; i < numPlayers; ++i)
   arcPlacing(
     i, new SimpleObject(oStoneLarge, 1, 1, 0, 4, 0, 2 * Math.PI, 4),
     clRock, avoidClasses(clForest, 10, clHill, 2),
-    stoneDistance, 2, isNomad() ? 100 : 10, 100
+    stoneDistance, 2, isNomad() ? 100 : 30, 400
   );
 
   arcPlacing(
     i, new SimpleObject(oMetalLarge, 1, 1, 0, 4),
     clMetal, avoidClasses(clForest, 10, clHill, 2, clRock, 5),
-    metalDistance, 2, isNomad() ? 100 : 7, 100
-  );
-
-  arcPlacing(
-    i, new SimpleObject(oMainHuntableAnimal, 5, 5, 0, 4),
-    clFood, avoidClasses(clForest, 4, clHill, 2, clMetal, 4, clRock, 4, clFood, 20),
-    huntDistance, 2, isNomad() ? 100 : 15, 50, false
-  );
-
-  arcPlacing(
-    i, new SimpleObject(oFruitBush, 5, 5, 0, 4),
-    clExtraBush, avoidClasses(clForest, 10, clHill, 2, clMetal, 4, clRock, 4, clFood, 10),
-    bushDistance, 2, isNomad() ? 100 : 10, 50, false
+    metalDistance, 2, isNomad() ? 100 : 30, 400
   );
 }
+
+let constraints = avoidClasses(clForest, 4, clHill, 1, clMetal, 4, clRock, 4, clFood, 10);
+let stragglerConstraints = avoidClasses(clForest, 4, clHill, 1, clMetal, 4, clRock, 4, clFood, 10, clBaseResource, 4);
+placeFoodBiomes[biome](clPlayers, constraints, stragglerConstraints);
 
 Engine.SetProgress(40);
 
 var [forestTrees, stragglerTrees] = getTreeCounts(...rBiomeTreeCount(1));
 createForests(
  [tMainTerrain, tForestFloor1, tForestFloor2, pForest1, pForest2],
- avoidClasses(clPlayer, 20, clForest, 18, clHill, 0, clMetal, 4, clRock, 4, clExtraBush, 6),
+ avoidClasses(clPlayer, 20, clForest, 18, clHill, 0, clMetal, 4, clRock, 4, clFood, 4),
  clForest,
  forestTrees);
 
@@ -212,7 +181,7 @@ Engine.SetProgress(65);
 
 var planetm = 1;
 
-if (currentBiome() == "generic/tropic")
+if (biome == "generic/tropic")
 	planetm = 8;
 
 createDecoration(
@@ -235,40 +204,40 @@ createDecoration(
 Engine.SetProgress(70);
 
 createFood(
-	[
-		[new SimpleObject(oMainHuntableAnimal, 5, 7, 0, 4)],
-		[new SimpleObject(oSecondaryHuntableAnimal, 2, 3, 0, 2)]
-	],
-	[
-		2 * numPlayers,
-		2 * numPlayers
-	],
-	avoidClasses(clForest, 0, clPlayer, 50, clHill, 1, clMetal, 4, clRock, 4, clFood, 20),
-	clFood);
+  [
+    [new SimpleObject(oMainHuntableAnimal, 5, 7, 0, 4)],
+    [new SimpleObject(oSecondaryHuntableAnimal, 2, 3, 0, 2)]
+  ],
+  [
+    2 * numPlayers,
+    2 * numPlayers
+  ],
+  avoidClasses(clForest, 0, clPlayer, 50, clHill, 1, clMetal, 4, clRock, 4, clFood, 20),
+  clFood);
 
 Engine.SetProgress(75);
 
 createFood(
-	[
-		[new SimpleObject(oFruitBush, 5, 7, 0, 4)]
-	],
-	[
-		2 * numPlayers
-	],
-	avoidClasses(clForest, 0, clPlayer, 45, clHill, 1, clMetal, 4, clRock, 4, clFood, 10),
-	clFood);
+  [
+    [new SimpleObject(oFruitBush, 5, 7, 0, 4)]
+  ],
+  [
+    2 * numPlayers
+  ],
+  avoidClasses(clForest, 0, clPlayer, 45, clHill, 1, clMetal, 4, clRock, 4, clFood, 10),
+  clFood);
 
 Engine.SetProgress(85);
 
 createStragglerTrees(
-	[oTree1, oTree2, oTree4, oTree3],
-	avoidClasses(
+  [oTree1, oTree2, oTree4, oTree3],
+  avoidClasses(
     clForest, 8, clHill, 1, clPlayer,
     currentBiome() === "generic/savanna" ? 12 : 38,
     clMetal, 6, clRock, 6, clFood, 1
   ),
-	clForest,
-	stragglerTrees);
+  clForest,
+  stragglerTrees);
 
 placePlayersNomad(clPlayer, avoidClasses(clForest, 1, clMetal, 4, clRock, 4, clHill, 4, clFood, 2));
 
