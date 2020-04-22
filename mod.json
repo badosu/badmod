@@ -1,6 +1,6 @@
 {
 	"name": "balanced-maps",
-	"version": "0.0.16",
+	"version": "0.0.17",
 	"label": "Balanced maps",
 	"description": "A collection of balanced maps.",
 	"dependencies": ["0ad=0.0.23"],
