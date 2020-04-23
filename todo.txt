@@ -4,3 +4,9 @@
 - Balanced mainland no first hunt when hills present
 - Fix inconsistent fish numbers on cross
 - Consider increasing wood multiplier on wrench and cross medium
+- Max 3 berries
+- Include fig/apple trees in generator
+- Straggler fauna in iber walls
+- 2 zebras in desert no straggler
+- default gen eles farther in savannah
+- mineral gen 0-2 1v1, 0-3 tg
