@@ -203,15 +203,22 @@ createDecoration(
 
 Engine.SetProgress(70);
 
+let huntGenDistance = 50;
+
+if (oMainHuntableAnimal == 'gaia/fauna_elephant_african_bush') {
+  huntGenDistance = 80;
+}
+
+// Separate for eles generation being farther
 createFood(
-  [
-    [new SimpleObject(oMainHuntableAnimal, 5, 7, 0, 4)],
-    [new SimpleObject(oSecondaryHuntableAnimal, 2, 3, 0, 2)]
-  ],
-  [
-    2 * numPlayers,
-    2 * numPlayers
-  ],
+  [ [new SimpleObject(oMainHuntableAnimal, 5, 7, 0, 4)] ],
+  [ 2 * numPlayers ],
+  avoidClasses(clForest, 0, clPlayer, huntGenDistance, clHill, 1, clMetal, 4, clRock, 4, clFood, 20),
+  clFood);
+
+createFood(
+  [ [new SimpleObject(oSecondaryHuntableAnimal, 2, 3, 0, 2)] ],
+  [ 2 * numPlayers ],
   avoidClasses(clForest, 0, clPlayer, 50, clHill, 1, clMetal, 4, clRock, 4, clFood, 20),
   clFood);
 
