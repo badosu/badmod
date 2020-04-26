@@ -94,19 +94,17 @@ createBumps(avoidClasses(clPlayer, 20));
 
 Engine.SetProgress(25);
 
-let biome = currentBiome();
+const biome = currentBiome();
 
 if (randBool())
   createHills([tCliff, tCliff, tHill], avoidClasses(clPlayer, 35, clHill, 15), clHill, scaleByMapSize(2, 11));
 else
   createMountains(tCliff, avoidClasses(clPlayer, 35, clHill, 15), clHill, scaleByMapSize(2, 11));
 
-var [playersOrder, playerPositions, playerAngles] = playerPlacements;
+const [playerIDs, playerPositions, playerAngles] = playerPlacements;
 
 const stoneDistance = 42;
 const metalDistance = 42;
-const huntDistance = 48;
-const bushDistance = 30;
 
 for (let i = 0; i < numPlayers; ++i)
 {
@@ -123,9 +121,9 @@ for (let i = 0; i < numPlayers; ++i)
   );
 }
 
-let constraints = avoidClasses(clForest, 4, clHill, 1, clMetal, 4, clRock, 4, clFood, 10);
-let stragglerConstraints = avoidClasses(clForest, 4, clHill, 1, clMetal, 4, clRock, 4, clFood, 10, clBaseResource, 4);
-placeFoodBiomes[biome](clPlayers, constraints, stragglerConstraints);
+let constraints = avoidClasses(clHill, 1, clMetal, 4, clRock, 4, clFood, 10);
+let stragglerConstraints = avoidClasses(clHill, 1, clMetal, 4, clRock, 4, clBaseResource, 10, clFood, 10);
+placeFoodBiomes[biome](playerPlacements, constraints, stragglerConstraints);
 
 Engine.SetProgress(40);
 
