@@ -55,12 +55,7 @@ var clBaseResource = g_Map.createTileClass();
 
 var playerPlacements = playerPlacementCircle(fractionToTiles(0.30));
 
-var clPlayers = [];
-for (let i = 0; i < numPlayers; ++i) {
-	clPlayers[i] = g_Map.createTileClass();
-}
-
-placePlayerBasesCustom({
+placePlayerBases({
 	"PlayerPlacement": playerPlacements,
 	"PlayerTileClass": clPlayer,
 	"BaseResourceClass": clBaseResource,
@@ -86,15 +81,13 @@ placePlayerBasesCustom({
 	"Decoratives": {
 		"template": aGrassShort
 	}
-}, clPlayer, clPlayers);
+});
 
 Engine.SetProgress(20);
 
 createBumps(avoidClasses(clPlayer, 20));
 
 Engine.SetProgress(25);
-
-const biome = currentBiome();
 
 if (randBool())
   createHills([tCliff, tCliff, tHill], avoidClasses(clPlayer, 35, clHill, 15), clHill, scaleByMapSize(2, 11));
@@ -103,27 +96,38 @@ else
 
 const [playerIDs, playerPositions, playerAngles] = playerPlacements;
 
-const stoneDistance = 42;
-const metalDistance = 42;
-
 for (let i = 0; i < numPlayers; ++i)
 {
-  arcPlacing(
-    i, new SimpleObject(oStoneLarge, 1, 1, 0, 4, 0, 2 * Math.PI, 4),
-    clRock, avoidClasses(clForest, 10, clHill, 2),
-    stoneDistance, 2, isNomad() ? 100 : 30, 400
+  const playerPosition = playerPositions[i];
+
+  let surroundingArea = new Area(new AnnulusPlacer(40, 44, playerPosition).place(new NullConstraint()));
+
+  let stone = new SimpleGroup(
+    [new SimpleObject(oStoneLarge, 1, 1, 0, 4, 0, 2 * Math.PI, 4)],
+    true,
+    clRock
   );
 
-  arcPlacing(
-    i, new SimpleObject(oMetalLarge, 1, 1, 0, 4),
-    clMetal, avoidClasses(clForest, 10, clHill, 2, clRock, 5),
-    metalDistance, 2, isNomad() ? 100 : 30, 400
+  let metal = new SimpleGroup(
+    [new SimpleObject(oMetalLarge, 1, 1, 0, 4)],
+    true,
+    clRock
+  );
+
+  createObjectGroupsByAreas(stone, 0,
+    avoidClasses(clForest, 10, clHill, 2, clRock, 5),
+    1, 400, [surroundingArea]
+  );
+
+  createObjectGroupsByAreas(metal, 0,
+    avoidClasses(clForest, 10, clHill, 2),
+    1, 400, [surroundingArea]
   );
 }
 
 let constraints = avoidClasses(clHill, 1, clMetal, 4, clRock, 4, clFood, 10);
 let stragglerConstraints = avoidClasses(clHill, 1, clMetal, 4, clRock, 4, clBaseResource, 10, clFood, 10);
-placeFoodBiomes[biome](playerPlacements, constraints, stragglerConstraints);
+placeBalancedFood(playerPlacements, constraints, stragglerConstraints);
 
 Engine.SetProgress(40);
 
@@ -179,7 +183,7 @@ Engine.SetProgress(65);
 
 var planetm = 1;
 
-if (biome == "generic/tropic")
+if (currentBiome() == "generic/tropic")
 	planetm = 8;
 
 createDecoration(
@@ -201,24 +205,7 @@ createDecoration(
 
 Engine.SetProgress(70);
 
-let huntGenDistance = 50;
-
-if (oMainHuntableAnimal == 'gaia/fauna_elephant_african_bush') {
-  huntGenDistance = 80;
-}
-
-// Separate for eles generation being farther
-createFood(
-  [ [new SimpleObject(oMainHuntableAnimal, 5, 7, 0, 4)] ],
-  [ 2 * numPlayers ],
-  avoidClasses(clForest, 0, clPlayer, huntGenDistance, clHill, 1, clMetal, 4, clRock, 4, clFood, 20),
-  clFood);
-
-createFood(
-  [ [new SimpleObject(oSecondaryHuntableAnimal, 2, 3, 0, 2)] ],
-  [ 2 * numPlayers ],
-  avoidClasses(clForest, 0, clPlayer, 50, clHill, 1, clMetal, 4, clRock, 4, clFood, 20),
-  clFood);
+createBadFood(avoidClasses(clForest, 0, clHill, 1, clMetal, 4, clRock, 4, clFood, 20));
 
 Engine.SetProgress(75);
 

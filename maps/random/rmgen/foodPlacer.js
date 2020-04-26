@@ -63,19 +63,15 @@ function placeFood(type, min, max, foodAmount, playerPosition, constraints, minT
   return amountPlaced * foodValues[type];
 }
 
-function placePlayerBasesCustom(playerBaseArgs, clPlayer, clPlayers)
-{
-  g_Map.log("Creating playerbases");
+function nearPlacing(object, tileClass, constraints, position, variance) {
+  const placeFunc = function() {
+    const tryPosition = Vector2D.add(position, new Vector2D(randIntInclusive(-variance, variance), randIntInclusive(-variance, variance))).round();
+    const group = new SimpleGroup([object], true, tileClass, tryPosition);
 
-  let [playerIDs, playerPosition] = playerBaseArgs.PlayerPlacement;
+    return group.place(0, new AndConstraint(constraints));
+  };
 
-  for (let i = 0; i < clPlayers.length; ++i)
-  {
-    playerBaseArgs.playerID = playerIDs[i];
-    playerBaseArgs.playerPosition = playerPosition[i];
-    playerBaseArgs.CityPatch.painters = [new TileClassPainter(clPlayer), new TileClassPainter(clPlayers[i])];
-    placePlayerBase(playerBaseArgs);
-  }
+  retryPlacing(placeFunc, 500, 1, true);
 }
 
 function arcVariation(angle, percent, canOffset = true) {
@@ -106,6 +102,10 @@ function arcPlacing(playerIndex, object, tileClass, constraints, radius, radiusV
   };
 
   retryPlacing(placeFunc, retries, 1, true);
+}
+
+function placeBalancedFood(playerPlacements, constraints, stragglerConstraints) {
+  placeFoodBiomes[currentBiome()](playerPlacements, constraints, stragglerConstraints);
 }
 
 function placeFoodTemperate(playerPlacements, constraints, stragglerConstraints) {
@@ -589,4 +589,24 @@ function placeFoodGiraffes(playerPlacements, constraints, stragglerConstraints) 
       dWarn("Remaining " + remainingFood);
     }
   }
+}
+function createBadFood(constraints) {
+  let huntGenDistance = 50;
+
+  if (oMainHuntableAnimal == 'gaia/fauna_elephant_african_bush') {
+    huntGenDistance = 80;
+  }
+
+  // Separate for eles generation being farther
+  createFood(
+    [ [new SimpleObject(oMainHuntableAnimal, 5, 7, 0, 4)] ],
+    [ 2 * numPlayers ],
+    new AndConstraint([avoidClasses(clPlayer, huntGenDistance), constraints]),
+    clFood);
+
+  createFood(
+    [ [new SimpleObject(oSecondaryHuntableAnimal, 2, 3, 0, 2)] ],
+    [ 2 * numPlayers ],
+    new AndConstraint([avoidClasses(clPlayer, huntGenDistance), constraints]),
+    clFood);
 }

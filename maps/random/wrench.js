@@ -90,17 +90,6 @@ Engine.SetProgress(20);
 var [playersOrder, playerPositions, playerAngles, startingAngle] = playerPlacements;
 const mapCenter = g_Map.getCenter();
 
-function nearPlacing(object, tileClass, constraints, position, variance) {
-  const placeFunc = function() {
-    const tryPosition = Vector2D.add(position, new Vector2D(randIntInclusive(-variance, variance), randIntInclusive(-variance, variance))).round();
-    const group = new SimpleGroup([object], true, tileClass, tryPosition);
-
-    return group.place(0, new AndConstraint(constraints));
-  };
-
-  retryPlacing(placeFunc, 500, 1, true);
-}
-
 const minesVariation = randIntInclusive(2, 12);
 
 for (let i = 0; i < numPlayers; ++i) {
@@ -200,28 +189,36 @@ const bushDistance = 30;
 
 for (let i = 0; i < numPlayers; ++i)
 {
-  arcPlacing(
-    i,
-    [
-      new SimpleObject(oMainHuntableAnimal, 5, 5, 0, 4),
-      new SimpleObject(oSecondaryHuntableAnimal, 3, 3, 0, 4),
-    ],
-    clFood, avoidClasses(clForest, 4, clHill, 1, clMetal, 4, clRock, 4, clFood, 20),
-    huntDistance, 2, isNomad() ? 100 : 20, 50
+  const playerPosition = playerPositions[i];
+
+  let surroundingArea = new Area(new AnnulusPlacer(40, 44, playerPosition).place(new NullConstraint()));
+
+  let stone = new SimpleGroup(
+    [new SimpleObject(oStoneLarge, 1, 1, 0, 4, 0, 2 * Math.PI, 4)],
+    true,
+    clRock
   );
 
-  arcPlacing(
-    i, [new SimpleObject(oSecondaryHuntableAnimal, 3, 3, 0, 4)],
-    clFood, avoidClasses(clForest, 4, clHill, 1, clMetal, 4, clRock, 4, clFood, 20),
-    huntDistance, 2, isNomad() ? 100 : 30, 50
+  let metal = new SimpleGroup(
+    [new SimpleObject(oMetalLarge, 1, 1, 0, 4)],
+    true,
+    clRock
   );
 
-  arcPlacing(
-    i, [new SimpleObject(oFruitBush, 5, 5, 0, 4)],
-    clFood, avoidClasses(clForest, 10, clHill, 1, clMetal, 4, clRock, 4, clFood, 10),
-    bushDistance, 2, isNomad() ? 100 : 10, 50
+  createObjectGroupsByAreas(stone, 0,
+    avoidClasses(clForest, 10, clHill, 2, clRock, 5),
+    1, 400, [surroundingArea]
+  );
+
+  createObjectGroupsByAreas(metal, 0,
+    avoidClasses(clForest, 10, clHill, 2),
+    1, 400, [surroundingArea]
   );
 }
+
+let constraints = avoidClasses(clHill, 1, clMetal, 4, clRock, 4, clFood, 10, clWrenchHead, 1);
+let stragglerConstraints = avoidClasses(clHill, 1, clMetal, 4, clRock, 4, clBaseResource, 10, clFood, 10, clWrenchHead, 1);
+placeBalancedFood(playerPlacements, constraints, stragglerConstraints);
 
 Engine.SetProgress(40);
 
@@ -288,29 +285,7 @@ createDecoration(
 
 Engine.SetProgress(70);
 
-createFood(
-	[
-		[new SimpleObject(oMainHuntableAnimal, 5, 7, 0, 4)],
-		[new SimpleObject(oSecondaryHuntableAnimal, 2, 3, 0, 2)]
-	],
-	[
-		2 * numPlayers,
-		2 * numPlayers
-	],
-	avoidClasses(clForest, 0, clPlayer, 45, clHill, 1, clMetal, 4, clRock, 4, clFood, 20, clWrenchHead, 5),
-	clFood);
-
-Engine.SetProgress(75);
-
-createFood(
-	[
-		[new SimpleObject(oFruitBush, 5, 7, 0, 4)]
-	],
-	[
-		2 * numPlayers
-	],
-	avoidClasses(clForest, 0, clPlayer, 50, clHill, 1, clMetal, 4, clRock, 4, clFood, 10, clWrenchHead, 10),
-	clFood);
+createBadFood(avoidClasses(clForest, 0, clHill, 1, clMetal, 4, clRock, 4, clFood, 20, clWrenchHead, 5));
 
 Engine.SetProgress(85);
 
