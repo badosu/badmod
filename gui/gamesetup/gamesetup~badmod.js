@@ -15,7 +15,7 @@ autociv_patchApplyN("getFilteredMods", function (target, that, args)
 
 autociv_patchApplyN("getFilteredMods", function (target, that, args)
 {
-	let mod = ([name, version]) => !/^balanced-maps.*/i.test(name);
+	let mod = ([name, version]) => !/^balanced[-_]maps.*/i.test(name);
 	return target.apply(that, args).filter(mod);
 });
 

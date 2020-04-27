@@ -12,6 +12,6 @@ autociv_patchApplyN("hasSameMods", function (target, that, args)
 
 autociv_patchApplyN("hasSameMods", function (target, that, args)
 {
-	let mod = ([name, version]) => !/^balanced-maps.*/i.test(name);
+	let mod = ([name, version]) => !/^balanced[-_]maps.*/i.test(name);
 	return target.apply(that, args.map(mods => mods.filter(mod)));
 })
