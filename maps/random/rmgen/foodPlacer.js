@@ -37,7 +37,7 @@ const foodValues = {
   'gaia/flora_bush_berry_desert': 100,
 };
 
-function placeFood(type, min, max, foodAmount, playerPosition, constraints, minTileBound = 23, maxTileBound = 30) {
+function placeFood(type, min, max, foodAmount, playerPosition, constraints, minTileBound = 17, maxTileBound = 25) {
   max = max < (foodAmount / foodValues[type]) ? max : Math.floor(foodAmount / foodValues[type]);
 
   let amountPlaced = randIntInclusive(min, max);
