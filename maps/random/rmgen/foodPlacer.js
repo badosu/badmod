@@ -2,6 +2,37 @@ Engine.LoadLibrary("rmbiome");
 
 const debugFood = true
 
+function placeBalancedMinerals(playerPositions, constraints = new NullConstraint()) {
+  for (let i = 0; i < playerPositions.length; ++i)
+  {
+    const playerPosition = playerPositions[i];
+
+    let surroundingArea = new Area(new AnnulusPlacer(40, 44, playerPosition).place(new NullConstraint()));
+
+    let stone = new SimpleGroup(
+      [new SimpleObject(oStoneLarge, 1, 1, 0, 4, 0, 2 * Math.PI, 4)],
+      true,
+      clRock
+    );
+
+    let metal = new SimpleGroup(
+      [new SimpleObject(oMetalLarge, 1, 1, 0, 4)],
+      true,
+      clRock
+    );
+
+    createObjectGroupsByAreas(stone, 0,
+      new AndConstraint([avoidClasses(clForest, 10, clHill, 2), constraints]),
+      1, 400, [surroundingArea]
+    );
+
+    createObjectGroupsByAreas(metal, 0,
+      new AndConstraint([avoidClasses(clForest, 10, clHill, 2, clRock, 6), constraints]),
+      1, 400, [surroundingArea]
+    );
+  }
+}
+
 function arcVariation(angle, percent) {
   const variation = 2 * Math.PI * percent / 100;
 

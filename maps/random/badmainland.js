@@ -96,34 +96,7 @@ else
 
 const [playerIDs, playerPositions, playerAngles] = playerPlacements;
 
-for (let i = 0; i < numPlayers; ++i)
-{
-  const playerPosition = playerPositions[i];
-
-  let surroundingArea = new Area(new AnnulusPlacer(40, 44, playerPosition).place(new NullConstraint()));
-
-  let stone = new SimpleGroup(
-    [new SimpleObject(oStoneLarge, 1, 1, 0, 4, 0, 2 * Math.PI, 4)],
-    true,
-    clRock
-  );
-
-  let metal = new SimpleGroup(
-    [new SimpleObject(oMetalLarge, 1, 1, 0, 4)],
-    true,
-    clRock
-  );
-
-  createObjectGroupsByAreas(stone, 0,
-    avoidClasses(clForest, 10, clHill, 2, clRock, 5),
-    1, 400, [surroundingArea]
-  );
-
-  createObjectGroupsByAreas(metal, 0,
-    avoidClasses(clForest, 10, clHill, 2),
-    1, 400, [surroundingArea]
-  );
-}
+placeBalancedMinerals(playerPositions);
 
 let constraints = avoidClasses(clHill, 1, clMetal, 4, clRock, 4, clFood, 10);
 let stragglerConstraints = avoidClasses(clHill, 1, clMetal, 4, clRock, 4, clBaseResource, 10, clFood, 10);

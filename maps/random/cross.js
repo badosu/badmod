@@ -124,7 +124,7 @@ for (let i = 0; i < numPlayers; ++i)
     lakeRadius - 2, 2, 2, 1000
   );
 
-  let lakeArea = new Area(new ODiskPlacer(30, lakePosition).place(stayClasses(clWater, 4)));
+  let lakeArea = new Area(new ODiskPlacer(30, lakePosition).place(new NullConstraint()));
   let fish = new SimpleGroup(
     [new SimpleObject(oFish, 2, 2, 0, 2)],
     true,
@@ -132,7 +132,7 @@ for (let i = 0; i < numPlayers; ++i)
   );
 
   createObjectGroupsByAreas(fish, 0,
-    avoidClasses(clFood, 12),
+    new AndConstraint([avoidClasses(clFood, 10), stayClasses(clWater, 8)]),
     5, 400, [lakeArea]
   );
 
@@ -171,24 +171,14 @@ for (let i = 0; i < numPlayers; ++i)
     ],
     avoidClasses(clPlayer, 25, clRock, 4, clMetal, 4));
 
-  const sideLakeArea = new Area(new ODiskPlacer(30, sideLakePosition).place(stayClasses(clWater, 4)));
+  const sideLakeArea = new Area(new ODiskPlacer(35, sideLakePosition).place(stayClasses(clWater, 1)));
   createObjectGroupsByAreas(fish, 0,
-    avoidClasses(clFood, 12),
-    10, 400, [sideLakeArea]
-  );
-
-  arcPlacing(
-    playerPosition, angle - Math.PI, [new SimpleObject(oStoneLarge, 1, 1, 0, 4, 0, 2 * Math.PI, 4)],
-    clRock, avoidClasses(clForest, 10, clWater, 6),
-    stoneDistance, 2, isNomad() ? 100 : 10, 100
-  );
-
-  arcPlacing(
-    playerPosition, angle - Math.PI, [new SimpleObject(oMetalLarge, 1, 1, 0, 4)],
-    clMetal, avoidClasses(clForest, 10, clRock, 5, clWater, 6),
-    metalDistance, 2, isNomad() ? 100 : 7, 100
+    avoidClasses(clFood, 10),
+    randIntInclusive(7, 10), 400, [sideLakeArea]
   );
 }
+
+placeBalancedMinerals(playerPositions, avoidClasses(clWater, 6));
 
 const constraints = avoidClasses(clHill, 1, clMetal, 4, clRock, 4, clFood, 10, clWater, 2);
 const stragglerConstraints = avoidClasses(clHill, 1, clMetal, 4, clRock, 4, clBaseResource, 10, clFood, 10, clWater, 2);

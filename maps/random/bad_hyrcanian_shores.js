@@ -127,38 +127,14 @@ Engine.SetProgress(20);
 
 for (let i = 0; i < numPlayers; ++i)
 {
-  const playerPosition = playerPositions[i];
-
-  let surroundingArea = new Area(new AnnulusPlacer(40, 44, playerPosition).place(new NullConstraint()));
-
-  let stone = new SimpleGroup(
-    [new SimpleObject(oStoneLarge, 1, 1, 0, 4, 0, 2 * Math.PI, 4)],
-    true,
-    clRock
-  );
-
-  let metal = new SimpleGroup(
-    [new SimpleObject(oMetalLarge, 1, 1, 0, 4)],
-    true,
-    clRock
-  );
-
-  createObjectGroupsByAreas(stone, 0,
-    avoidClasses(clForest, 10, clHill, 2, clRock, 5),
-    1, 400, [surroundingArea]
-  );
-
-  createObjectGroupsByAreas(metal, 0,
-    avoidClasses(clForest, 10, clHill, 2),
-    1, 400, [surroundingArea]
-  );
-
   nearPlacing(
     new SimpleObject(oFish, 3, 3, 0, 4),
-    clFood, stayClasses(clWater, 6),
+    clFood, stayClasses(clWater, 3),
     Vector2D.add(playerPositions[i], new Vector2D(65).rotate(actualAngle - Math.PI / 2)), 2
   );
 }
+
+placeBalancedMinerals(playerPositions);
 
 const constraints = avoidClasses(clHill, 1, clMetal, 4, clRock, 4, clFood, 10);
 const stragglerConstraints = avoidClasses(clHill, 1, clMetal, 4, clRock, 4, clBaseResource, 10, clFood, 10);
@@ -178,11 +154,11 @@ createArea(
 	new TileClassPainter(clHighlands));
 
 g_Map.log("Creating fish");
-for (let i = 0; i < scaleByMapSize(30, 60); ++i)
+for (let i = 0; i < scaleByMapSize(40, 80); ++i)
 	createObjectGroupsDeprecated(
 		new SimpleGroup([new SimpleObject(oFish, 2, 3, 0, 2)], true, clFood),
 		0,
-		[stayClasses(clWater, 2), avoidClasses(clFood, 3)],
+		[stayClasses(clWater, 8), avoidClasses(clFood, 10)],
 		numPlayers,
 		50);
 Engine.SetProgress(25);
@@ -223,7 +199,7 @@ for (let type of types)
 			new LayeredPainter(type, [2]),
 			new TileClassPainter(clForest)
 		],
-		avoidClasses(clPlayer, 20, clWater, 3, clForest, 10, clHill, 0, clBaseResource, 3),
+		avoidClasses(clPlayer, 20, clWater, 3, clForest, 10, clHill, 0, clBaseResource, 3, clRock, 2, clMetal, 2),
 		num);
 Engine.SetProgress(45);
 
