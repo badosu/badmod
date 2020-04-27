@@ -157,70 +157,11 @@ createArea(
 
 createBumps(avoidClasses(clPlayer, 20, clMetal, 6, clRock, 6));
 
-
-function arcVariation(angle, percent) {
-  const variation = 2 * Math.PI * percent / 100;
-
-  return randFloat(angle - variation, angle + variation);
-}
-
-function arcPlacing(playerIndex, objects, tileClass, constraints, radius, radiusVariation, angleVariation, retries = 30) {
-  const placeFunc = function() {
-    const playerPosition = playerPositions[playerIndex];
-    const angle = playerAngles[playerIndex];
-
-    const calculatedRadius = randIntInclusive(radius - radiusVariation, radius + radiusVariation);
-    const calculatedAngle = arcVariation(angle, angleVariation);
-
-    const position = Vector2D.add(playerPosition, new Vector2D(calculatedRadius, 0).rotate(-calculatedAngle)).round();
-
-    const group = new SimpleGroup(objects, true, tileClass, position);
-
-    return group.place(0, new AndConstraint(constraints));
-  };
-
-  retryPlacing(placeFunc, retries, 1, true);
-}
-
-const stoneDistance = 42;
-const metalDistance = 42;
-const huntDistance = 48;
-const bushDistance = 30;
-
-for (let i = 0; i < numPlayers; ++i)
-{
-  const playerPosition = playerPositions[i];
-
-  let surroundingArea = new Area(new AnnulusPlacer(40, 44, playerPosition).place(new NullConstraint()));
-
-  let stone = new SimpleGroup(
-    [new SimpleObject(oStoneLarge, 1, 1, 0, 4, 0, 2 * Math.PI, 4)],
-    true,
-    clRock
-  );
-
-  let metal = new SimpleGroup(
-    [new SimpleObject(oMetalLarge, 1, 1, 0, 4)],
-    true,
-    clRock
-  );
-
-  createObjectGroupsByAreas(stone, 0,
-    avoidClasses(clForest, 10, clHill, 2, clRock, 5),
-    1, 400, [surroundingArea]
-  );
-
-  createObjectGroupsByAreas(metal, 0,
-    avoidClasses(clForest, 10, clHill, 2),
-    1, 400, [surroundingArea]
-  );
-}
+Engine.SetProgress(40);
 
 let constraints = avoidClasses(clHill, 1, clMetal, 4, clRock, 4, clFood, 10, clWrenchHead, 1);
 let stragglerConstraints = avoidClasses(clHill, 1, clMetal, 4, clRock, 4, clBaseResource, 10, clFood, 10, clWrenchHead, 1);
 placeBalancedFood(playerPlacements, constraints, stragglerConstraints);
-
-Engine.SetProgress(40);
 
 if (randBool())
   createHills([tCliff, tCliff, tHill], avoidClasses(clPlayer, 35, clHill, 15, clMetal, 10, clRock, 10, clWrenchHead, 20, clFood, 4), clHill, scaleByMapSize(2, 11));

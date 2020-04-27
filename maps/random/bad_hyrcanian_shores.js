@@ -21,9 +21,12 @@ const oPalm = "gaia/flora_tree_cretan_date_palm_short";
 const oApple = "gaia/flora_tree_apple";
 const oOak = "gaia/flora_tree_oak";
 const oBerryBush = "gaia/flora_bush_berry";
+const oFruitBush = oBerryBush;
 const oDeer = "gaia/fauna_deer";
+const oMainHuntableAnimal = oDeer;
 const oFish = "gaia/fauna_fish";
 const oGoat = "gaia/fauna_goat";
+const oSecondaryHuntableAnimal = oGoat;
 const oBoar = "gaia/fauna_boar";
 const oStoneLarge = "gaia/geology_stonemine_temperate_quarry";
 const oStoneSmall = "gaia/geology_stone_temperate";
@@ -68,9 +71,10 @@ var highlandsPosition = fractionToTiles(0.75);
 
 var startAngle = randomAngle();
 const playerPositions = playerPlacementLine(startAngle, mapCenter, fractionToTiles(0.2));
+const playerPlacements = [sortAllPlayers(), playerPositions];
 
 placePlayerBases({
-	"PlayerPlacement": [sortAllPlayers(), playerPositions],
+	"PlayerPlacement": playerPlacements,
 	"PlayerTileClass": clPlayer,
 	"BaseResourceClass": clBaseResource,
 	"CityPatch": {
@@ -101,30 +105,6 @@ Engine.SetProgress(10);
 const actualCenter = numPlayers === 2 ? Vector2D.add(playerPositions[0], playerPositions[1]).mult(0.5).round() : mapCenter;
 const actualAngle = numPlayers === 2 ? actualCenter.angleTo(playerPositions[0]) + Math.PI / 2 : startAngle;
 
-function arcVariation(angle, percent) {
-  const variation = 2 * Math.PI * percent / 100;
-
-  return -Math.PI + randFloat(angle - variation, angle + variation);
-}
-
-function arcPlacing(playerIndex, object, tileClass, constraints, radius, radiusVariation, angleVariation, retries = 30) {
-  const placeFunc = function() {
-    const playerPosition = playerPositions[playerIndex];
-    const angle = playerPosition.angleTo(actualCenter);
-
-    const calculatedRadius = randIntInclusive(radius - radiusVariation, radius + radiusVariation);
-    const calculatedAngle = arcVariation(angle, angleVariation) + Math.PI;
-
-    const position = Vector2D.add(playerPosition, new Vector2D(calculatedRadius, 0).rotate(-calculatedAngle)).round();
-
-    const group = new SimpleGroup([object], true, tileClass, position);
-
-    return group.place(0, new AndConstraint(constraints));
-  };
-
-  retryPlacing(placeFunc, retries, 1, true);
-}
-
 paintRiver({
 	"parallel": true,
 	"start": new Vector2D(mapBounds.left, mapBounds.top).rotateAround(actualAngle, actualCenter),
@@ -146,46 +126,32 @@ paintRiver({
 });
 Engine.SetProgress(20);
 
-function nearPlacing(object, tileClass, constraints, position, variance) {
-  const placeFunc = function() {
-    const tryPosition = Vector2D.add(position, new Vector2D(randIntInclusive(-variance, variance), randIntInclusive(-variance, variance))).round();
-    const group = new SimpleGroup([object], true, tileClass, tryPosition);
-
-    return group.place(0, new AndConstraint(constraints));
-  };
-
-  retryPlacing(placeFunc, 500, 1, true);
-}
-
-const stoneDistance = 42;
-const metalDistance = 42;
-const huntDistance = 48;
-const bushDistance = 30;
-
 for (let i = 0; i < numPlayers; ++i)
 {
-  arcPlacing(
-    i, new SimpleObject(oStoneLarge, 1, 1, 0, 4, 0, 2 * Math.PI, 4),
-    clRock, avoidClasses(clForest, 10, clHill, 2, clWater, 6),
-    stoneDistance, 2, isNomad() ? 100 : 10, 100
+  const playerPosition = playerPositions[i];
+
+  let surroundingArea = new Area(new AnnulusPlacer(40, 44, playerPosition).place(new NullConstraint()));
+
+  let stone = new SimpleGroup(
+    [new SimpleObject(oStoneLarge, 1, 1, 0, 4, 0, 2 * Math.PI, 4)],
+    true,
+    clRock
   );
 
-  arcPlacing(
-    i, new SimpleObject(oMetalLarge, 1, 1, 0, 4),
-    clMetal, avoidClasses(clForest, 10, clHill, 2, clRock, 5, clWater, 6),
-    metalDistance, 2, isNomad() ? 100 : 7, 100
+  let metal = new SimpleGroup(
+    [new SimpleObject(oMetalLarge, 1, 1, 0, 4)],
+    true,
+    clRock
   );
 
-  arcPlacing(
-    i, new SimpleObject(oGoat, 5, 5, 0, 4),
-    clFood, avoidClasses(clForest, 4, clHill, 2, clMetal, 4, clRock, 4, clFood, 20, clWater, 6),
-    huntDistance, 2, isNomad() ? 100 : 15, 50
+  createObjectGroupsByAreas(stone, 0,
+    avoidClasses(clForest, 10, clHill, 2, clRock, 5),
+    1, 400, [surroundingArea]
   );
 
-  arcPlacing(
-    i, new SimpleObject(oBerryBush, 5, 5, 0, 4),
-    clFood, avoidClasses(clForest, 10, clHill, 2, clMetal, 4, clRock, 4, clFood, 10, clWater, 6),
-    bushDistance, 2, isNomad() ? 100 : 10, 50
+  createObjectGroupsByAreas(metal, 0,
+    avoidClasses(clForest, 10, clHill, 2),
+    1, 400, [surroundingArea]
   );
 
   nearPlacing(
@@ -194,6 +160,10 @@ for (let i = 0; i < numPlayers; ++i)
     Vector2D.add(playerPositions[i], new Vector2D(65).rotate(actualAngle - Math.PI / 2)), 2
   );
 }
+
+let constraints = avoidClasses(clHill, 1, clMetal, 4, clRock, 4, clFood, 10);
+let stragglerConstraints = avoidClasses(clHill, 1, clMetal, 4, clRock, 4, clBaseResource, 10, clFood, 10);
+placeBalancedFood(playerPlacements, constraints, stragglerConstraints);
 
 g_Map.log("Marking highlands area");
 createArea(
@@ -234,7 +204,7 @@ createAreas(
 		new SmoothElevationPainter(ELEVATION_SET, heightHill, 2),
 		new TileClassPainter(clHill)
 	],
-	avoidClasses(clPlayer, 20, clWater, 5, clHill, 15, clHighlands, 5, clRock, 6, clMetal, 6),
+	avoidClasses(clPlayer, 20, clWater, 5, clHill, 15, clHighlands, 5, clRock, 6, clMetal, 6, clFood, 2),
 	scaleByMapSize(1, 4) * numPlayers);
 
 Engine.SetProgress(35);

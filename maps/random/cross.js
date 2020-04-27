@@ -53,7 +53,6 @@ var clPlayer = g_Map.createTileClass();
 var clHill = g_Map.createTileClass();
 var clForest = g_Map.createTileClass();
 var clDirt = g_Map.createTileClass();
-var clExtraBush = g_Map.createTileClass();
 var clRock = g_Map.createTileClass();
 var clMetal = g_Map.createTileClass();
 var clFood = g_Map.createTileClass();
@@ -62,36 +61,6 @@ var clBaseResource = g_Map.createTileClass();
 
 var playerPlacements = playerPlacementCircle(fractionToTiles(0.26));
 const mapCenter = g_Map.getCenter();
-
-function arcVariation(angle, percent) {
-  const variation = 2 * Math.PI * percent / 100;
-
-  return randFloat(angle - variation, angle + variation);
-}
-
-function arcPlacing(center, angle, objects, tileClass, constraints, radius, radiusVariation, angleVariation, retries = 30) {
-  const placeFunc = function() {
-    const calculatedRadius = randIntInclusive(radius - radiusVariation, radius + radiusVariation);
-    const calculatedAngle = arcVariation(angle, angleVariation);
-    const position = Vector2D.add(center, new Vector2D(calculatedRadius, 0).rotate(-calculatedAngle)).round();
-    const group = new SimpleGroup(objects, true, tileClass, position);
-
-    return group.place(0, new AndConstraint(constraints));
-  };
-
-  retryPlacing(placeFunc, 100000, 1, true);
-}
-
-function nearPlacing(object, tileClass, constraints, position, variance) {
-  const placeFunc = function() {
-    const tryPosition = Vector2D.add(position, new Vector2D(randIntInclusive(-variance, variance), randIntInclusive(-variance, variance))).round();
-    const group = new SimpleGroup([object], true, tileClass, tryPosition);
-
-    return group.place(0, new AndConstraint(constraints));
-  };
-
-  retryPlacing(placeFunc, 500, 1, true);
-}
 
 placePlayerBases({
 	"PlayerPlacement": playerPlacements,
@@ -125,8 +94,6 @@ Engine.SetProgress(20);
 const [playersOrder, playerPositions, playerAngles, startingAngle] = playerPlacements;
 const stoneDistance = 42;
 const metalDistance = 42;
-const huntDistance = 48;
-const bushDistance = 30;
 
 for (let i = 0; i < numPlayers; ++i)
 {
@@ -157,19 +124,17 @@ for (let i = 0; i < numPlayers; ++i)
     lakeRadius - 2, 2, 2, 1000
   );
 
-  for (let fishIndex = 0; fishIndex < 2; ++fishIndex) {
-    arcPlacing(
-      playerPosition, angle - Math.PI / 9, [new SimpleObject(oFish, 2, 2, 0, 2)],
-      clFood, [avoidClasses(clFood, 6), stayClasses(clWater, 4)],
-      lakeRadius + 7 + fishIndex * 7, 6, 5, 1000
-    );
+  let lakeArea = new Area(new ODiskPlacer(30, lakePosition).place(stayClasses(clWater, 4)));
+  let fish = new SimpleGroup(
+    [new SimpleObject(oFish, 2, 2, 0, 2)],
+    true,
+    clFood
+  );
 
-    arcPlacing(
-      playerPosition, angle + Math.PI / 10, [new SimpleObject(oFish, 2, 2, 0, 2)],
-      clFood, [avoidClasses(clFood, 6), stayClasses(clWater, 4)],
-      lakeRadius + 7 + fishIndex * 7, 6, 5, 1000
-    );
-  }
+  createObjectGroupsByAreas(fish, 0,
+    avoidClasses(clFood, 12),
+    5, 400, [lakeArea]
+  );
 
   const offsetAngle = Math.PI / numPlayers;
   const sideLakeRadius = fractionToTiles(0.5) - 2;
@@ -206,16 +171,11 @@ for (let i = 0; i < numPlayers; ++i)
     ],
     avoidClasses(clPlayer, 25, clRock, 4, clMetal, 4));
 
-  for (let fishIndex = 0; fishIndex < 10; ++fishIndex) {
-    const sideFishPosition = Vector2D.add(mapCenter, new Vector2D(sideLakeRadius - 35 + fishIndex, 0).rotate(-angle - offsetAngle)).round();
-
-    nearPlacing(
-      new SimpleObject(oFish, 2, 3, 0, 2),
-      clFood,
-      [avoidClasses(clFood, 6), stayClasses(clWater, 6)],
-      sideFishPosition, 20
-    )
-  }
+  const sideLakeArea = new Area(new ODiskPlacer(30, sideLakePosition).place(stayClasses(clWater, 4)));
+  createObjectGroupsByAreas(fish, 0,
+    avoidClasses(clFood, 12),
+    10, 400, [sideLakeArea]
+  );
 
   arcPlacing(
     playerPosition, angle - Math.PI, [new SimpleObject(oStoneLarge, 1, 1, 0, 4, 0, 2 * Math.PI, 4)],
@@ -228,19 +188,12 @@ for (let i = 0; i < numPlayers; ++i)
     clMetal, avoidClasses(clForest, 10, clRock, 5, clWater, 6),
     metalDistance, 2, isNomad() ? 100 : 7, 100
   );
-
-  arcPlacing(
-    playerPosition, angle - Math.PI, [new SimpleObject(oMainHuntableAnimal, 5, 5, 0, 4)],
-    clFood, avoidClasses(clForest, 4, clMetal, 4, clRock, 4, clFood, 20, clWater, 6),
-    huntDistance, 2, isNomad() ? 100 : 15, 50
-  );
-
-  arcPlacing(
-    playerPosition, angle - Math.PI, [new SimpleObject(oFruitBush, 5, 5, 0, 4)],
-    clExtraBush, avoidClasses(clForest, 10, clMetal, 4, clRock, 4, clFood, 10, clWater, 6),
-    bushDistance, 2, isNomad() ? 100 : 10, 50
-  );
 }
+
+const constraints = avoidClasses(clHill, 1, clMetal, 4, clRock, 4, clFood, 10, clWater, 2);
+const stragglerConstraints = avoidClasses(clHill, 1, clMetal, 4, clRock, 4, clBaseResource, 10, clFood, 10, clWater, 2);
+const foodMultiplier = 0.5; // Fishing is map dynamic
+placeBalancedFood(playerPlacements, constraints, stragglerConstraints, foodMultiplier);
 
 paintTerrainBasedOnHeight(2.4, 3.4, 3, tMainTerrain);
 paintTerrainBasedOnHeight(1, 2.4, 0, tShore);
@@ -262,7 +215,7 @@ const forestMultiplier = g_Map.getSize() > 256 ? 1 : 1.4;
 var [forestTrees, stragglerTrees] = getTreeCounts(...rBiomeTreeCount(forestMultiplier));
 createForests(
  [tMainTerrain, tForestFloor1, tForestFloor2, pForest1, pForest2],
- avoidClasses(clPlayer, 18, clForest, 15, clHill, 0, clMetal, 4, clRock, 4, clExtraBush, 6, clWater, 4),
+ avoidClasses(clPlayer, 18, clForest, 15, clHill, 0, clMetal, 4, clRock, 4, clWater, 4),
  clForest,
  forestTrees);
 

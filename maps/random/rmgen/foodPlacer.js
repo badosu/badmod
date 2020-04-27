@@ -1,4 +1,25 @@
+Engine.LoadLibrary("rmbiome");
+
 const debugFood = true
+
+function arcVariation(angle, percent) {
+  const variation = 2 * Math.PI * percent / 100;
+
+  return randFloat(angle - variation, angle + variation);
+}
+
+function arcPlacing(center, angle, objects, tileClass, constraints, radius, radiusVariation, angleVariation, retries = 30) {
+  const placeFunc = function() {
+    const calculatedRadius = randIntInclusive(radius - radiusVariation, radius + radiusVariation);
+    const calculatedAngle = arcVariation(angle, angleVariation);
+    const position = Vector2D.add(center, new Vector2D(calculatedRadius, 0).rotate(-calculatedAngle)).round();
+    const group = new SimpleGroup(objects, true, tileClass, position);
+
+    return group.place(0, new AndConstraint(constraints));
+  };
+
+  retryPlacing(placeFunc, 100000, 1, true);
+}
 
 // TODO: Remove after fine tuning
 function dWarn(message) {
@@ -74,44 +95,17 @@ function nearPlacing(object, tileClass, constraints, position, variance) {
   retryPlacing(placeFunc, 500, 1, true);
 }
 
-function arcVariation(angle, percent, canOffset = true) {
-  const isMediumOrLarger = g_Map.getSize() > 192;
-  const variation = 2 * Math.PI * percent / 100;
-  var offset = -Math.PI;
-
-  if (canOffset && numPlayers > 2 && isMediumOrLarger && randBool()) {
-    offset = 0;
-  }
-
-  return offset + randFloat(angle - variation, angle + variation);
+function placeBalancedFood(playerPlacements, constraints, stragglerConstraints, multiplier = 1) {
+  const biome = currentBiome() || 'generic/temperate';
+  dWarn('Placing food for biome: ' + biome);
+  placeFoodBiomes[biome](playerPlacements, constraints, stragglerConstraints, multiplier);
 }
 
-function arcPlacing(playerIndex, object, tileClass, constraints, radius, radiusVariation, angleVariation, retries = 30, canOffset = true) {
-  const placeFunc = function() {
-    const playerPosition = playerPositions[playerIndex];
-    const angle = playerAngles[playerIndex];
-
-    const calculatedRadius = randIntInclusive(radius - radiusVariation, radius + radiusVariation);
-    const calculatedAngle = arcVariation(angle, angleVariation, canOffset);
-
-    const position = Vector2D.add(playerPosition, new Vector2D(calculatedRadius, 0).rotate(-calculatedAngle)).round();
-
-    const group = new SimpleGroup([object], true, tileClass, position);
-
-    return group.place(0, new AndConstraint(constraints));
-  };
-
-  retryPlacing(placeFunc, retries, 1, true);
-}
-
-function placeBalancedFood(playerPlacements, constraints, stragglerConstraints) {
-  placeFoodBiomes[currentBiome()](playerPlacements, constraints, stragglerConstraints);
-}
-
-function placeFoodTemperate(playerPlacements, constraints, stragglerConstraints) {
+function placeFoodTemperate(playerPlacements, constraints, stragglerConstraints, multiplier) {
   const [playerIDs, playerPositions] = playerPlacements;
 
   let initialFoodAmount = randBool(0.75) ? randIntInclusive(0, 15) : randIntInclusive(16, 30);
+  initialFoodAmount = Math.floor(multiplier * initialFoodAmount);
   initialFoodAmount *= 100;
 
   if (initialFoodAmount <= 600 && randBool(0.5)) {
@@ -168,10 +162,11 @@ function placeFoodTemperate(playerPlacements, constraints, stragglerConstraints)
   }
 }
 
-function placeFoodAutumn(playerPlacements, constraints, stragglerConstraints) {
+function placeFoodAutumn(playerPlacements, constraints, stragglerConstraints, multiplier) {
   const [playerIDs, playerPositions] = playerPlacements;
 
   let initialFoodAmount = randBool(0.75) ? randIntInclusive(0, 15) : randIntInclusive(16, 30);
+  initialFoodAmount = Math.floor(multiplier * initialFoodAmount);
   initialFoodAmount *= 100;
 
   if (initialFoodAmount <= 600 && randBool(0.5)) {
@@ -227,10 +222,11 @@ function placeFoodAutumn(playerPlacements, constraints, stragglerConstraints) {
   }
 }
 
-function placeFoodDesert(playerPlacements, constraints, stragglerConstraints) {
+function placeFoodDesert(playerPlacements, constraints, stragglerConstraints, multiplier) {
   const [playerIDs, playerPositions] = playerPlacements;
 
   let initialFoodAmount = randBool(0.75) ? randIntInclusive(0, 15) : randIntInclusive(16, 30);
+  initialFoodAmount = Math.floor(multiplier * initialFoodAmount);
   initialFoodAmount *= 100;
 
   if (initialFoodAmount <= 600 && randBool(0.5)) {
@@ -287,10 +283,11 @@ function placeFoodDesert(playerPlacements, constraints, stragglerConstraints) {
   }
 }
 
-function placeFoodTropic(playerPlacements, constraints, stragglerConstraints) {
+function placeFoodTropic(playerPlacements, constraints, stragglerConstraints, multiplier) {
   const [playerIDs, playerPositions] = playerPlacements;
 
   let initialFoodAmount = randBool(0.75) ? randIntInclusive(0, 15) : randIntInclusive(16, 30);
+  initialFoodAmount = Math.floor(multiplier * initialFoodAmount);
   initialFoodAmount *= 100;
 
   if (initialFoodAmount <= 600 && randBool(0.5)) {
@@ -352,10 +349,12 @@ function placeFoodTropic(playerPlacements, constraints, stragglerConstraints) {
   }
 }
 
-function placeFoodSnowy(playerPlacements, constraints, stragglerConstraints) {
+function placeFoodSnowy(playerPlacements, constraints, stragglerConstraints, multiplier) {
   const [playerIDs, playerPositions] = playerPlacements;
 
-  let initialFoodAmount = randIntInclusive(0, 15) * 2; // make initial amount even cause fauna
+  let initialFoodAmount = randIntInclusive(0, 30);
+  initialFoodAmount = Math.floor(multiplier * initialFoodAmount);
+  if (initialFoodAmount % 2 == 1) initialFoodAmount++;// make initial amount even cause fauna
   initialFoodAmount *= 100;
 
   if (initialFoodAmount <= 600 && randBool(0.5)) {
@@ -410,14 +409,14 @@ function placeFoodSnowy(playerPlacements, constraints, stragglerConstraints) {
   }
 }
 
-function placeFoodSavanna(playerPlacements, constraints, stragglerConstraints) {
+function placeFoodSavanna(playerPlacements, constraints, stragglerConstraints, multiplier) {
   if (oMainHuntableAnimal == 'gaia/fauna_elephant_african_bush') {
-    placeFoodEles(playerPlacements, constraints, stragglerConstraints);
+    placeFoodEles(playerPlacements, constraints, stragglerConstraints, multiplier);
 
     return;
   }
   else if (oMainHuntableAnimal == 'gaia/fauna_giraffe') {
-    placeFoodGiraffes(playerPlacements, constraints, stragglerConstraints);
+    placeFoodGiraffes(playerPlacements, constraints, stragglerConstraints, multiplier);
 
     return;
   }
@@ -425,6 +424,7 @@ function placeFoodSavanna(playerPlacements, constraints, stragglerConstraints) {
   const [playerIDs, playerPositions] = playerPlacements;
 
   let initialFoodAmount = randIntInclusive(10, 30);
+  initialFoodAmount = Math.floor(multiplier * initialFoodAmount);
   initialFoodAmount *= 100;
 
   if (initialFoodAmount <= 600 && randBool(0.5)) {
@@ -480,11 +480,11 @@ function placeFoodSavanna(playerPlacements, constraints, stragglerConstraints) {
   }
 }
 
-function placeFoodEles(playerPlacements, constraints, stragglerConstraints) {
+function placeFoodEles(playerPlacements, constraints, stragglerConstraints, multiplier) {
   const [playerIDs, playerPositions] = playerPlacements;
 
   let initialFoodAmount = randIntInclusive(17, 50);
-
+  initialFoodAmount = Math.floor(multiplier * initialFoodAmount);
   initialFoodAmount *= 100;
 
   for (let i = 0; i < playerPositions.length; ++i)
@@ -535,11 +535,11 @@ function placeFoodEles(playerPlacements, constraints, stragglerConstraints) {
   }
 }
 
-function placeFoodGiraffes(playerPlacements, constraints, stragglerConstraints) {
+function placeFoodGiraffes(playerPlacements, constraints, stragglerConstraints, multiplier) {
   const [playerIDs, playerPositions] = playerPlacements;
 
   let initialFoodAmount = 7 * randIntInclusive(2, 6);
-
+  initialFoodAmount = Math.floor(multiplier * initialFoodAmount);
   initialFoodAmount *= 100;
 
   for (let i = 0; i < playerPositions.length; ++i)
