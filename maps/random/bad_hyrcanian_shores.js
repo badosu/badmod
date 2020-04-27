@@ -117,7 +117,6 @@ paintRiver({
 	"meanderShort": 20,
 	"meanderLong": 0,
 	"waterFunc": (position, height, riverFraction) => {
-
 		if (height < heightShore2)
 			clWater.add(position);
 
@@ -161,9 +160,10 @@ for (let i = 0; i < numPlayers; ++i)
   );
 }
 
-let constraints = avoidClasses(clHill, 1, clMetal, 4, clRock, 4, clFood, 10);
-let stragglerConstraints = avoidClasses(clHill, 1, clMetal, 4, clRock, 4, clBaseResource, 10, clFood, 10);
-placeBalancedFood(playerPlacements, constraints, stragglerConstraints);
+const constraints = avoidClasses(clHill, 1, clMetal, 4, clRock, 4, clFood, 10);
+const stragglerConstraints = avoidClasses(clHill, 1, clMetal, 4, clRock, 4, clBaseResource, 10, clFood, 10);
+const foodMultiplier = 0.8;
+placeBalancedFood(playerPlacements, constraints, stragglerConstraints, foodMultiplier);
 
 g_Map.log("Marking highlands area");
 createArea(
