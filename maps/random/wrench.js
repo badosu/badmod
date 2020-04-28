@@ -168,8 +168,15 @@ if (randBool())
 else
   createMountains(tCliff, avoidClasses(clPlayer, 35, clHill, 15, clMetal, 10, clRock, 10, clWrenchHead, 20, clFood, 4), clHill, scaleByMapSize(2, 11));
 
-const forestMultiplier = g_Map.getSize() > 192 ? 1 : 1.4;
-const [forestTrees, stragglerTrees] = getTreeCounts(...rBiomeTreeCount(forestMultiplier));
+if (currentBiome() != "generic/savanna") {
+  createPlayerForests(
+   playerPositions,
+   [tMainTerrain, tForestFloor1, tForestFloor2, pForest1, pForest2],
+   avoidClasses(clForest, 18, clHill, 0, clMetal, 4, clRock, 4, clFood, 4, clWrenchHead, 4),
+   clForest);
+}
+
+const [forestTrees, stragglerTrees] = getTreeCounts(...rBiomeTreeCount(1));
 
 createForests(
  [tMainTerrain, tForestFloor1, tForestFloor2, pForest1, pForest2],
@@ -234,7 +241,7 @@ createStragglerTrees(
 	[oTree1, oTree2, oTree4, oTree3],
 	avoidClasses(
     clForest, 8, clHill, 1, clPlayer,
-    currentBiome() === "generic/savanna" ? 12 : 38,
+    currentBiome() === "generic/savanna" ? 12 : 30,
     clMetal, 6, clRock, 6, clFood, 1, clWrenchHead, 10
   ),
 	clForest,

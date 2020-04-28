@@ -104,10 +104,18 @@ placeBalancedFood(playerPlacements, constraints, stragglerConstraints);
 
 Engine.SetProgress(40);
 
+if (currentBiome() != "generic/savanna") {
+  createPlayerForests(
+   playerPositions,
+   [tMainTerrain, tForestFloor1, tForestFloor2, pForest1, pForest2],
+   avoidClasses(clForest, 18, clHill, 0, clMetal, 4, clRock, 4, clFood, 4),
+   clForest);
+}
+
 var [forestTrees, stragglerTrees] = getTreeCounts(...rBiomeTreeCount(1));
 createForests(
  [tMainTerrain, tForestFloor1, tForestFloor2, pForest1, pForest2],
- avoidClasses(clPlayer, 20, clForest, 18, clHill, 0, clMetal, 4, clRock, 4, clFood, 4),
+ avoidClasses(clPlayer, 30, clForest, 18, clHill, 0, clMetal, 4, clRock, 4, clFood, 4),
  clForest,
  forestTrees);
 
@@ -198,7 +206,7 @@ createStragglerTrees(
   [oTree1, oTree2, oTree4, oTree3],
   avoidClasses(
     clForest, 8, clHill, 1, clPlayer,
-    currentBiome() === "generic/savanna" ? 12 : 38,
+    (currentBiome() == "generic/savanna") ? 12 : 30,
     clMetal, 6, clRock, 6, clFood, 1
   ),
   clForest,

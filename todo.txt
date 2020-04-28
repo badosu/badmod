@@ -2,6 +2,5 @@
 - For hunt on top of hill for wrench tg
 - Balanced mainland no secondary metal
 - Balanced mainland no first hunt when hills present
-- Consider increasing wood multiplier on wrench and cross medium
 - Include fig/apple trees in generator
 - mineral gen 0-2 1v1, 0-3 tg
