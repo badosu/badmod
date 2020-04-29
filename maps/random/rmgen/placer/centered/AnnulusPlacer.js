@@ -14,28 +14,24 @@ AnnulusPlacer.prototype.setCenterPosition = function(position)
   this.centerPosition = deepfreeze(position.clone().round());
 };
 
-AnnulusPlacer.prototype.place = function(constraint)
+AnnulusPlacer.prototype.place = function(constraint = new NullConstraint())
 {
-  const minX = this.centerPosition.x - this.maxRadius;
-  const maxX = this.centerPosition.x + this.maxRadius;
-  const minY = this.centerPosition.y - this.maxRadius;
-  const maxY = this.centerPosition.y + this.maxRadius;
-
   let points = [];
-  let point = new Vector2D();
-  for (let x = minX; x <= maxX; ++x)
-    for (let y = minY; y <= maxY; ++y)
+
+  const xMin = Math.floor(Math.max(0, this.centerPosition.x - this.maxRadius));
+  const yMin = Math.floor(Math.max(0, this.centerPosition.y - this.maxRadius));
+  const xMax = Math.ceil(Math.min(g_Map.getSize(), this.centerPosition.x + this.maxRadius));
+  const yMax = Math.ceil(Math.min(g_Map.getSize(), this.centerPosition.y + this.maxRadius));
+
+  let it = new Vector2D();
+  for (it.x = xMin; it.x <= xMax; ++it.x)
+    for (it.y = yMin; it.y <= yMax; ++it.y)
     {
-      point.set(x, y);
+      const distance = this.centerPosition.distanceToSquared(it);
 
-      if (!g_Map.validTile(point)) { continue; }
-
-      const distance = this.centerPosition.distanceToSquared(point);
-
-      if (this.minRadiusSquared <= distance && this.maxRadiusSquared >= distance && constraint.allows(point))
-        points.push(point.clone());
+      if (this.minRadiusSquared <= distance && this.maxRadiusSquared >= distance && constraint.allows(it))
+        points.push(it.clone());
     }
 
   return points;
 };
-
