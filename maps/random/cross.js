@@ -1,6 +1,7 @@
 Engine.LoadLibrary("rmgen");
 Engine.LoadLibrary("rmgen-common");
 Engine.LoadLibrary("rmbiome");
+Engine.LoadLibrary("balancedHelpers");
 
 setSelectedBiome();
 
@@ -47,6 +48,7 @@ const heightLand = 3;
 
 var g_Map = new RandomMap(heightLand, tMainTerrain);
 
+const mapSize = g_Map.getSize();
 const numPlayers = getNumPlayers();
 
 var clPlayer = g_Map.createTileClass();
@@ -138,21 +140,23 @@ for (let i = 0; i < numPlayers; ++i)
   const sideLakeRadius = fractionToTiles(0.5) - 2;
   const sideLakePosition = Vector2D.add(mapCenter, new Vector2D(sideLakeRadius, 0).rotate(-angle - offsetAngle)).round();
 
-  const sideMinesRadius = Math.round((sideLakeRadius - 40) * 2 / numPlayers + scaleByMapSize(0, 30));
-  const sideMetalPosition = Vector2D.add(mapCenter, new Vector2D(sideMinesRadius, 0).rotate(-angle - offsetAngle - offsetAngle / 4)).round();
-  const sideStonePosition = Vector2D.add(mapCenter, new Vector2D(sideMinesRadius, 0).rotate(-angle - offsetAngle + offsetAngle / 4)).round();
+  if (mapSize > 128) {
+    const sideMinesRadius = Math.round((sideLakeRadius - 40) * 2 / numPlayers + scaleByMapSize(0, 30));
+    const sideMetalPosition = Vector2D.add(mapCenter, new Vector2D(sideMinesRadius, 0).rotate(-angle - offsetAngle - offsetAngle / 4)).round();
+    const sideStonePosition = Vector2D.add(mapCenter, new Vector2D(sideMinesRadius, 0).rotate(-angle - offsetAngle + offsetAngle / 4)).round();
 
-  nearPlacing(
-    new SimpleObject(oStoneLarge, 1, 1, 0, 4, 0, 2 * Math.PI, 4),
-    clRock, [avoidClasses(clForest, 10, clWater, 3)],
-    sideMetalPosition, 2
-  );
+    nearPlacing(
+      new SimpleObject(oStoneLarge, 1, 1, 0, 4, 0, 2 * Math.PI, 4),
+      clRock, [avoidClasses(clForest, 10, clWater, 3)],
+      sideMetalPosition, 2
+    );
 
-  nearPlacing(
-    new SimpleObject(oMetalLarge, 1, 1, 0, 4),
-    clMetal, [avoidClasses(clForest, 10, clWater, 3, clRock, 4)],
-    sideStonePosition, 2
-  );
+    nearPlacing(
+      new SimpleObject(oMetalLarge, 1, 1, 0, 4),
+      clMetal, [avoidClasses(clForest, 10, clWater, 3, clRock, 4)],
+      sideStonePosition, 2
+    );
+  }
 
   createArea(
     new ChainPlacer(

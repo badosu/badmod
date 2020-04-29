@@ -1,6 +1,7 @@
 Engine.LoadLibrary("rmgen");
 Engine.LoadLibrary("rmgen-common");
 Engine.LoadLibrary("rmbiome");
+Engine.LoadLibrary("balancedHelpers");
 
 setSelectedBiome();
 
@@ -42,6 +43,7 @@ const heightLand = 3;
 
 var g_Map = new RandomMap(heightLand, tMainTerrain);
 
+const mapSize = g_Map.getSize();
 const numPlayers = getNumPlayers();
 
 var clPlayer = g_Map.createTileClass();
@@ -116,8 +118,9 @@ for (let i = 0; i < numPlayers; ++i) {
   );
 
   const minesClumpPosition = new Vector2D(minesRadius - 15).rotate(- playerAngle - offsetAngle);
+  const wrenchHeadSize = (mapSize > 128) ? 1100 : 700;
   createArea(
-  	new ClumpPlacer(1100, 0.97, 0.8, Infinity, Vector2D.add(mapCenter, minesClumpPosition).round()),
+  	new ClumpPlacer(wrenchHeadSize, 0.97, 0.8, Infinity, Vector2D.add(mapCenter, minesClumpPosition).round()),
     [
   			new TerrainPainter(tCliff),
   			new SmoothElevationPainter(ELEVATION_SET, 24, 1),
@@ -127,26 +130,30 @@ for (let i = 0; i < numPlayers; ++i) {
   );
 
 
-  nearPlacing(
-    new SimpleObject(oStoneLarge, 1, 1, 0, 4),
-    clRock,
-    avoidClasses(clForest, 6, clHill, 7),
-    Vector2D.add(mapCenter, new Vector2D(fractionToTiles(0.42), 0).rotate(- playerAngle + offsetAngle / 3)).round(),
-    5
-  );
+  if (mapSize > 128) {
+    nearPlacing(
+      new SimpleObject(oStoneLarge, 1, 1, 0, 4),
+      clRock,
+      avoidClasses(clForest, 6, clHill, 7),
+      Vector2D.add(mapCenter, new Vector2D(fractionToTiles(0.42), 0).rotate(- playerAngle + offsetAngle / 3)).round(),
+      5
+    );
 
-  nearPlacing(
-    new SimpleObject(oMetalLarge, 1, 1, 0, 4),
-    clMetal,
-    avoidClasses(clForest, 6, clHill, 7),
-    Vector2D.add(mapCenter, new Vector2D(fractionToTiles(0.42), 0).rotate(- playerAngle - offsetAngle / 3)).round(),
-    5
-  );
+    nearPlacing(
+      new SimpleObject(oMetalLarge, 1, 1, 0, 4),
+      clMetal,
+      avoidClasses(clForest, 6, clHill, 7),
+      Vector2D.add(mapCenter, new Vector2D(fractionToTiles(0.42), 0).rotate(- playerAngle - offsetAngle / 3)).round(),
+      5
+    );
+  }
 }
 
 Engine.SetProgress(25);
+
+const handleSize = (mapSize > 128) ? 2800 + (numPlayers - 2) * 4000 : 3000;
 createArea(
-	new ClumpPlacer(2800 + (numPlayers - 2) * 4000, 0.97, 0.8, Infinity, mapCenter),
+	new ClumpPlacer(handleSize, 0.97, 0.8, Infinity, mapCenter),
   [
 			new TerrainPainter(tCliff),
 			new SmoothElevationPainter(ELEVATION_SET, 24, 1),
@@ -169,10 +176,10 @@ else
   createMountains(tCliff, avoidClasses(clPlayer, 35, clHill, 15, clMetal, 10, clRock, 10, clWrenchHead, 20, clFood, 4), clHill, scaleByMapSize(2, 11));
 
 if (currentBiome() != "generic/savanna") {
-  createPlayerForests(
+  createBalancedPlayerForests(
    playerPositions,
    [tMainTerrain, tForestFloor1, tForestFloor2, pForest1, pForest2],
-   avoidClasses(clForest, 18, clHill, 0, clMetal, 4, clRock, 4, clFood, 4, clWrenchHead, 4),
+   avoidClasses(clForest, 18, clHill, 2, clMetal, 4, clRock, 4, clFood, 4, clWrenchHead, 4),
    clForest);
 }
 
@@ -180,7 +187,7 @@ const [forestTrees, stragglerTrees] = getTreeCounts(...rBiomeTreeCount(1));
 
 createForests(
  [tMainTerrain, tForestFloor1, tForestFloor2, pForest1, pForest2],
- avoidClasses(clPlayer, 20, clForest, 15, clHill, 0, clMetal, 6, clRock, 6, clFood, 6, clWrenchHead, 10),
+ avoidClasses(clPlayer, 20, clForest, 15, clHill, 1, clMetal, 6, clRock, 6, clFood, 6, clWrenchHead, 10),
  clForest,
  forestTrees);
 

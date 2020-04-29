@@ -1,6 +1,7 @@
 Engine.LoadLibrary("rmgen");
 Engine.LoadLibrary("rmgen-common");
 Engine.LoadLibrary("rmbiome");
+Engine.LoadLibrary("balancedHelpers");
 
 setSelectedBiome();
 
@@ -98,9 +99,9 @@ const [playerIDs, playerPositions, playerAngles] = playerPlacements;
 
 let constraints = avoidClasses(clHill, 1, clMetal, 4, clRock, 4, clFood, 10);
 let stragglerConstraints = avoidClasses(clHill, 1, clMetal, 4, clRock, 4, clBaseResource, 10, clFood, 10);
-placeBalancedFood(playerPlacements, constraints, stragglerConstraints);
 
 placeBalancedMinerals(playerPositions);
+placeBalancedFood(playerPlacements, constraints, stragglerConstraints);
 
 Engine.SetProgress(40);
 
@@ -108,14 +109,14 @@ if (currentBiome() != "generic/savanna") {
   createBalancedPlayerForests(
    playerPositions,
    [tMainTerrain, tForestFloor1, tForestFloor2, pForest1, pForest2],
-   avoidClasses(clForest, 18, clHill, 0, clMetal, 4, clRock, 4, clFood, 4),
+   avoidClasses(clForest, 18, clHill, 1, clMetal, 4, clRock, 4, clFood, 4),
    clForest);
 }
 
 var [forestTrees, stragglerTrees] = getTreeCounts(...rBiomeTreeCount(1));
 createForests(
  [tMainTerrain, tForestFloor1, tForestFloor2, pForest1, pForest2],
- avoidClasses(clPlayer, 30, clForest, 18, clHill, 0, clMetal, 4, clRock, 4, clFood, 4),
+ avoidClasses(clPlayer, 30, clForest, 18, clHill, 1, clMetal, 4, clRock, 4, clFood, 4),
  clForest,
  forestTrees);
 

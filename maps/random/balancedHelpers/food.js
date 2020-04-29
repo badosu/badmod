@@ -1,99 +1,7 @@
 Engine.LoadLibrary("rmbiome");
 
-const debugFood = true
+const debugFood = true;
 
-function createBalancedPlayerForests(playerPositions, terrainSet, constraint, tileClass)
-{
-	// Construct different forest types from the terrain textures and template names.
-	let [mainTerrain, terrainForestFloor1, terrainForestFloor2, terrainForestTree1, terrainForestTree2] = terrainSet;
-
-	// The painter will pick a random Terrain for each part of the forest.
-	let forestVariants = [
-		{
-			"borderTerrains": [terrainForestFloor2, mainTerrain, terrainForestTree1],
-			"interiorTerrains": [terrainForestFloor2, terrainForestTree1]
-		},
-		{
-			"borderTerrains": [terrainForestFloor1, mainTerrain, terrainForestTree2],
-			"interiorTerrains": [terrainForestFloor1, terrainForestTree2]
-		}
-	];
-	
-	let forestVariant = pickRandom(forestVariants);
-	let treeCount = randIntInclusive(20, 30);
-  let forestAmount = randIntInclusive(3, 4);
-		
-  for (let i = 0; i < playerPositions.length; ++i)
-  {
-    const playerPosition = playerPositions[i];
-
-    let forestArea = new Area(new AnnulusPlacer(30, 40, playerPosition).place());
-
-	  createAreasInAreas(
-	  	new ChainPlacer(1, 3, treeCount, 0), 
-	  	[
-	  		new LayeredPainter([forestVariant.borderTerrains, forestVariant.interiorTerrains], [2]),
-	  		new TileClassPainter(tileClass)
-	  	], 
-	  	constraint, 
-	  	forestAmount, 
-	  	400, 
-	  	[forestArea]);
-  }
-}
-
-function placeBalancedMinerals(playerPositions, constraints = new NullConstraint()) {
-  for (let i = 0; i < playerPositions.length; ++i)
-  {
-    const playerPosition = playerPositions[i];
-
-    let placer = new AnnulusPlacer(40, 44, playerPosition).place();
-    let surroundingArea = new Area(placer);
-
-    let stone = new SimpleGroup(
-      [new SimpleObject(oStoneLarge, 1, 1, 0, 4, 0, 2 * Math.PI, 4)],
-      true,
-      clRock
-    );
-
-    let metal = new SimpleGroup(
-      [new SimpleObject(oMetalLarge, 1, 1, 0, 4)],
-      true,
-      clRock
-    );
-
-    createObjectGroupsByAreas(stone, 0,
-      new AndConstraint([avoidClasses(clForest, 10, clHill, 2, clFood, 4, clPlayer, 34), constraints]),
-      1, 400, [surroundingArea]
-    );
-
-    createObjectGroupsByAreas(metal, 0,
-      new AndConstraint([avoidClasses(clForest, 10, clHill, 2, clFood, 4, clPlayer, 34, clRock, 6), constraints]),
-      1, 400, [surroundingArea]
-    );
-  }
-}
-
-function arcVariation(angle, percent) {
-  const variation = 2 * Math.PI * percent / 100;
-
-  return randFloat(angle - variation, angle + variation);
-}
-
-function arcPlacing(center, angle, objects, tileClass, constraints, radius, radiusVariation, angleVariation, retries = 30) {
-  const placeFunc = function() {
-    const calculatedRadius = randIntInclusive(radius - radiusVariation, radius + radiusVariation);
-    const calculatedAngle = arcVariation(angle, angleVariation);
-    const position = Vector2D.add(center, new Vector2D(calculatedRadius, 0).rotate(-calculatedAngle)).round();
-    const group = new SimpleGroup(objects, true, tileClass, position);
-
-    return group.place(0, new AndConstraint(constraints));
-  };
-
-  retryPlacing(placeFunc, 100000, 1, true);
-}
-
-// TODO: Remove after fine tuning
 function dWarn(message) {
   if (debugFood) {
     warn(message);
@@ -130,6 +38,21 @@ const foodValues = {
   'gaia/flora_bush_berry_desert': 100,
 };
 
+let foodPlacers = {};
+
+// Memoize areas
+function getFoodArea(minTileBound, maxTileBound, playerPosition) {
+  const key = [minTileBound, maxTileBound, playerPosition.x, playerPosition.y];
+
+  if (key in foodPlacers) {
+    return foodPlacers[key];
+  } else {
+    const area = new Area(new AnnulusPlacer(minTileBound, maxTileBound, playerPosition).place());
+    foodPlacers[key] = area;
+    return area;
+  }
+}
+
 function placeFoodAmount(type, min, max, foodAmount, playerPosition, constraints, minTileBound = 17, maxTileBound = 25) {
   max = max < (foodAmount / foodValues[type]) ? max : Math.floor(foodAmount / foodValues[type]);
 
@@ -140,7 +63,7 @@ function placeFoodAmount(type, min, max, foodAmount, playerPosition, constraints
     maxTileBound += 8;
   }
 
-  let points = new AnnulusPlacer(minTileBound, maxTileBound, playerPosition).place();
+  let area = getFoodArea(minTileBound, maxTileBound, playerPosition);
 
   let group = new SimpleGroup(
     [new SimpleObject(type, amountPlaced, amountPlaced, 0, 4)],
@@ -149,8 +72,8 @@ function placeFoodAmount(type, min, max, foodAmount, playerPosition, constraints
   );
 
   createObjectGroupsByAreas(group, 0,
-    new AndConstraint([constraints]),
-    1, 400, [new Area(points)]
+    constraints,
+    1, 400, [area]
   );
 
   return amountPlaced * foodValues[type];
@@ -231,6 +154,10 @@ function placeFoodTemperate(playerPlacements, constraints, stragglerConstraints,
       }
       dWarn("Remaining " + remainingFood);
     }
+
+    if (remainingFood < 0) {
+      warn('Player ' + i + ' ended up with additional ' + Math.abs(remainingFood) + ' food');
+    }
   }
 }
 
@@ -290,6 +217,10 @@ function placeFoodAutumn(playerPlacements, constraints, stragglerConstraints, mu
         }
       }
       dWarn("Remaining " + remainingFood);
+    }
+
+    if (remainingFood < 0) {
+      warn('Player ' + i + ' ended up with additional ' + Math.abs(remainingFood) + ' food');
     }
   }
 }
@@ -351,6 +282,10 @@ function placeFoodDesert(playerPlacements, constraints, stragglerConstraints, mu
         }
       }
       dWarn("Remaining " + remainingFood);
+    }
+
+    if (remainingFood < 0) {
+      warn('Player ' + i + ' ended up with additional ' + Math.abs(remainingFood) + ' food');
     }
   }
 }
@@ -418,6 +353,10 @@ function placeFoodTropic(playerPlacements, constraints, stragglerConstraints, mu
       }
       dWarn("Remaining " + remainingFood);
     }
+
+    if (remainingFood < 0) {
+      warn('Player ' + i + ' ended up with additional ' + Math.abs(remainingFood) + ' food');
+    }
   }
 }
 
@@ -477,6 +416,10 @@ function placeFoodSnowy(playerPlacements, constraints, stragglerConstraints, mul
         }
       }
       dWarn("Remaining " + remainingFood);
+    }
+
+    if (remainingFood < 0) {
+      warn('Player ' + i + ' ended up with additional ' + Math.abs(remainingFood) + ' food');
     }
   }
 }
@@ -549,6 +492,10 @@ function placeFoodSavanna(playerPlacements, constraints, stragglerConstraints, m
       }
       dWarn("Remaining " + remainingFood);
     }
+
+    if (remainingFood < 0) {
+      warn('Player ' + i + ' ended up with additional ' + Math.abs(remainingFood) + ' food');
+    }
   }
 }
 
@@ -603,6 +550,10 @@ function placeFoodEles(playerPlacements, constraints, stragglerConstraints, mult
         }
       }
       dWarn("Remaining " + remainingFood);
+    }
+
+    if (remainingFood < 0) {
+      warn('Player ' + i + ' ended up with additional ' + Math.abs(remainingFood) + ' food');
     }
   }
 }
@@ -659,6 +610,10 @@ function placeFoodGiraffes(playerPlacements, constraints, stragglerConstraints, 
         }
       }
       dWarn("Remaining " + remainingFood);
+    }
+
+    if (remainingFood < 0) {
+      warn('Player ' + i + ' ended up with additional ' + Math.abs(remainingFood) + ' food');
     }
   }
 }

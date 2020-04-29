@@ -20,8 +20,8 @@ AnnulusPlacer.prototype.place = function(constraint = new NullConstraint())
 
   const xMin = Math.floor(Math.max(0, this.centerPosition.x - this.maxRadius));
   const yMin = Math.floor(Math.max(0, this.centerPosition.y - this.maxRadius));
-  const xMax = Math.ceil(Math.min(g_Map.getSize(), this.centerPosition.x + this.maxRadius));
-  const yMax = Math.ceil(Math.min(g_Map.getSize(), this.centerPosition.y + this.maxRadius));
+  const xMax = Math.ceil(Math.min(g_Map.getSize() - 1, this.centerPosition.x + this.maxRadius));
+  const yMax = Math.ceil(Math.min(g_Map.getSize() - 1, this.centerPosition.y + this.maxRadius));
 
   let it = new Vector2D();
   for (it.x = xMin; it.x <= xMax; ++it.x)
@@ -33,5 +33,6 @@ AnnulusPlacer.prototype.place = function(constraint = new NullConstraint())
         points.push(it.clone());
     }
 
+  warn('AAA ' + points.length);
   return points;
 };

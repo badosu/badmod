@@ -22,8 +22,8 @@ ODiskPlacer.prototype.place = function(constraint)
 
 	const xMin = Math.floor(Math.max(0, this.centerPosition.x - this.radius));
 	const yMin = Math.floor(Math.max(0, this.centerPosition.y - this.radius));
-	const xMax = Math.ceil(Math.min(g_Map.getSize(), this.centerPosition.x + this.radius));
-	const yMax = Math.ceil(Math.min(g_Map.getSize(), this.centerPosition.y + this.radius));
+	const xMax = Math.ceil(Math.min(g_Map.getSize() - 1, this.centerPosition.x + this.radius));
+	const yMax = Math.ceil(Math.min(g_Map.getSize() - 1, this.centerPosition.y + this.radius));
 
 	let it = new Vector2D();
 	for (it.x = xMin; it.x <= xMax; ++it.x)
@@ -32,6 +32,8 @@ ODiskPlacer.prototype.place = function(constraint)
 			if (this.centerPosition.distanceToSquared(it) <= this.radiusSquared && constraint.allows(it))
 				points.push(it.clone());
 		}
+
+  warn('LLL ' + points.length);
 
 	return points;
 };

@@ -1,5 +1,6 @@
 Engine.LoadLibrary("rmgen");
 Engine.LoadLibrary("rmgen-common");
+Engine.LoadLibrary("balancedHelpers");
 
 const tPrimary = "temp_grass_long";
 const tGrass = ["temp_grass_clovers"];
@@ -134,13 +135,13 @@ for (let i = 0; i < numPlayers; ++i)
   );
 }
 
+const mineralConstraints = avoidClasses(clWater, 3);
+placeBalancedMinerals(playerPositions, mineralConstraints);
+
 const constraints = avoidClasses(clHill, 1, clMetal, 4, clRock, 4, clFood, 10);
 const stragglerConstraints = avoidClasses(clHill, 1, clMetal, 4, clRock, 4, clBaseResource, 10, clFood, 10);
 const foodMultiplier = 0.8;
 placeBalancedFood(playerPlacements, constraints, stragglerConstraints, foodMultiplier);
-
-const mineralConstraints = avoidClasses(clWater, 3);
-placeBalancedMinerals(playerPositions, mineralConstraints);
 
 g_Map.log("Marking highlands area");
 createArea(
