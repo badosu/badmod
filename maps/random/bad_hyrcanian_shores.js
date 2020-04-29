@@ -134,12 +134,13 @@ for (let i = 0; i < numPlayers; ++i)
   );
 }
 
-placeBalancedMinerals(playerPositions);
-
 const constraints = avoidClasses(clHill, 1, clMetal, 4, clRock, 4, clFood, 10);
 const stragglerConstraints = avoidClasses(clHill, 1, clMetal, 4, clRock, 4, clBaseResource, 10, clFood, 10);
 const foodMultiplier = 0.8;
 placeBalancedFood(playerPlacements, constraints, stragglerConstraints, foodMultiplier);
+
+const mineralConstraints = avoidClasses(clWater, 3);
+placeBalancedMinerals(playerPositions, mineralConstraints);
 
 g_Map.log("Marking highlands area");
 createArea(
@@ -216,7 +217,7 @@ for (let type of types)
 			new LayeredPainter(type, [2]),
 			new TileClassPainter(clForest)
 		],
-		avoidClasses(clPlayer, 20, clWater, 3, clForest, 2, clHill, 0),
+		avoidClasses(clPlayer, 20, clWater, 3, clForest, 2, clHill, 0, clMetal, 2, clRock, 2),
 		num);
 Engine.SetProgress(70);
 

@@ -2,7 +2,7 @@ Engine.LoadLibrary("rmbiome");
 
 const debugFood = true
 
-function createPlayerForests(playerPositions, terrainSet, constraint, tileClass)
+function createBalancedPlayerForests(playerPositions, terrainSet, constraint, tileClass)
 {
 	// Construct different forest types from the terrain textures and template names.
 	let [mainTerrain, terrainForestFloor1, terrainForestFloor2, terrainForestTree1, terrainForestTree2] = terrainSet;
@@ -27,7 +27,7 @@ function createPlayerForests(playerPositions, terrainSet, constraint, tileClass)
   {
     const playerPosition = playerPositions[i];
 
-    let forestArea = new Area(new AnnulusPlacer(30, 40, playerPosition).place(new NullConstraint()));
+    let forestArea = new Area(new AnnulusPlacer(30, 40, playerPosition).place());
 
 	  createAreasInAreas(
 	  	new ChainPlacer(1, 3, treeCount, 0), 
@@ -47,7 +47,8 @@ function placeBalancedMinerals(playerPositions, constraints = new NullConstraint
   {
     const playerPosition = playerPositions[i];
 
-    let surroundingArea = new Area(new AnnulusPlacer(40, 44, playerPosition).place(new NullConstraint()));
+    let placer = new AnnulusPlacer(40, 44, playerPosition).place();
+    let surroundingArea = new Area(placer);
 
     let stone = new SimpleGroup(
       [new SimpleObject(oStoneLarge, 1, 1, 0, 4, 0, 2 * Math.PI, 4)],
@@ -62,12 +63,12 @@ function placeBalancedMinerals(playerPositions, constraints = new NullConstraint
     );
 
     createObjectGroupsByAreas(stone, 0,
-      new AndConstraint([avoidClasses(clForest, 10, clHill, 2), constraints]),
+      new AndConstraint([avoidClasses(clForest, 10, clHill, 2, clFood, 4, clPlayer, 34), constraints]),
       1, 400, [surroundingArea]
     );
 
     createObjectGroupsByAreas(metal, 0,
-      new AndConstraint([avoidClasses(clForest, 10, clHill, 2, clRock, 6), constraints]),
+      new AndConstraint([avoidClasses(clForest, 10, clHill, 2, clFood, 4, clPlayer, 34, clRock, 6), constraints]),
       1, 400, [surroundingArea]
     );
   }
@@ -129,7 +130,7 @@ const foodValues = {
   'gaia/flora_bush_berry_desert': 100,
 };
 
-function placeFood(type, min, max, foodAmount, playerPosition, constraints, minTileBound = 17, maxTileBound = 25) {
+function placeFoodAmount(type, min, max, foodAmount, playerPosition, constraints, minTileBound = 17, maxTileBound = 25) {
   max = max < (foodAmount / foodValues[type]) ? max : Math.floor(foodAmount / foodValues[type]);
 
   let amountPlaced = randIntInclusive(min, max);
@@ -139,7 +140,7 @@ function placeFood(type, min, max, foodAmount, playerPosition, constraints, minT
     maxTileBound += 8;
   }
 
-  let points = new AnnulusPlacer(minTileBound, maxTileBound, playerPosition).place(new NullConstraint());
+  let points = new AnnulusPlacer(minTileBound, maxTileBound, playerPosition).place();
 
   let group = new SimpleGroup(
     [new SimpleObject(type, amountPlaced, amountPlaced, 0, 4)],
@@ -197,16 +198,16 @@ function placeFoodTemperate(playerPlacements, constraints, stragglerConstraints,
         let placedAmount = 0;
 
         if (getCivCode(playerIDs[i]) == 'iber') {
-          placedAmount = placeFood(oMainHuntableAnimal, foodQty, foodQty, remainingFood, playerPosition, constraints, 19, 22);
+          placedAmount = placeFoodAmount(oMainHuntableAnimal, foodQty, foodQty, remainingFood, playerPosition, constraints, 19, 22);
         } else {
-          placedAmount = placeFood(oMainHuntableAnimal, foodQty, foodQty, remainingFood, playerPosition, stragglerConstraints, 7, 10);
+          placedAmount = placeFoodAmount(oMainHuntableAnimal, foodQty, foodQty, remainingFood, playerPosition, stragglerConstraints, 7, 10);
         }
 
         remainingFood -= placedAmount;
         dWarn("Player " + i + " - placed " + oMainHuntableAnimal + ": " + placedAmount);
       }
       else if (remainingFood <= 1000) {
-        const placedAmount = placeFood(oMainHuntableAnimal, 5, 5, remainingFood, playerPosition, constraints);
+        const placedAmount = placeFoodAmount(oMainHuntableAnimal, 5, 5, remainingFood, playerPosition, constraints);
         remainingFood -= placedAmount;
         dWarn("Player " + i + " - placed " + oMainHuntableAnimal + ": " + placedAmount);
       }
@@ -214,16 +215,16 @@ function placeFoodTemperate(playerPlacements, constraints, stragglerConstraints,
         if (remainingBerries > 0 && randBool(0.75)) {
           let placedAmount = 0;
           if (getCivCode(playerIDs[i]) == 'iber') {
-            placedAmount = placeFood(oFruitBush, 5, 6, remainingFood, playerPosition, constraints, 27, 30);
+            placedAmount = placeFoodAmount(oFruitBush, 5, 6, remainingFood, playerPosition, constraints, 27, 30);
           } else {
-            placedAmount = placeFood(oFruitBush, 5, 6, remainingFood, playerPosition, constraints);
+            placedAmount = placeFoodAmount(oFruitBush, 5, 6, remainingFood, playerPosition, constraints);
           }
           remainingFood -= placedAmount;
           remainingBerries -= 1;
           dWarn("Player " + i + " - placed " + oFruitBush + ": " + placedAmount);
         }
         else {
-          const placedAmount = placeFood(oSecondaryHuntableAnimal, 5, 8, remainingFood, playerPosition, constraints);
+          const placedAmount = placeFoodAmount(oSecondaryHuntableAnimal, 5, 8, remainingFood, playerPosition, constraints);
           remainingFood -= placedAmount;
           dWarn("Player " + i + " - placed " + oSecondaryHuntableAnimal + ": " + placedAmount);
         }
@@ -257,16 +258,16 @@ function placeFoodAutumn(playerPlacements, constraints, stragglerConstraints, mu
         let placedAmount = 0;
 
         if (getCivCode(playerIDs[i]) == 'iber') {
-          placedAmount = placeFood(oSecondaryHuntableAnimal, foodQty, foodQty, remainingFood, playerPosition, constraints, 19, 22);
+          placedAmount = placeFoodAmount(oSecondaryHuntableAnimal, foodQty, foodQty, remainingFood, playerPosition, constraints, 19, 22);
         } else {
-          placedAmount = placeFood(oSecondaryHuntableAnimal, foodQty, foodQty, remainingFood, playerPosition, stragglerConstraints, 7, 10);
+          placedAmount = placeFoodAmount(oSecondaryHuntableAnimal, foodQty, foodQty, remainingFood, playerPosition, stragglerConstraints, 7, 10);
         }
 
         remainingFood -= placedAmount;
         dWarn("Player " + i + " - placed " + oSecondaryHuntableAnimal + ": " + placedAmount);
       }
       else if (remainingFood <= 800) {
-        const placedAmount = placeFood(oMainHuntableAnimal, 5, 5, remainingFood, playerPosition, constraints);
+        const placedAmount = placeFoodAmount(oMainHuntableAnimal, 5, 5, remainingFood, playerPosition, constraints);
         remainingFood -= placedAmount;
         dWarn("Player " + i + " - placed " + oMainHuntableAnimal + ": " + placedAmount);
       }
@@ -274,16 +275,16 @@ function placeFoodAutumn(playerPlacements, constraints, stragglerConstraints, mu
         if (remainingBerries > 0 && randBool(0.75)) {
           let placedAmount = 0
           if (getCivCode(playerIDs[i]) == 'iber') {
-            placedAmount = placeFood(oFruitBush, 5, 6, remainingFood, playerPosition, constraints, 27, 30);
+            placedAmount = placeFoodAmount(oFruitBush, 5, 6, remainingFood, playerPosition, constraints, 27, 30);
           } else {
-            placedAmount = placeFood(oFruitBush, 5, 6, remainingFood, playerPosition, constraints);
+            placedAmount = placeFoodAmount(oFruitBush, 5, 6, remainingFood, playerPosition, constraints);
           }
           remainingFood -= placedAmount;
           remainingBerries -= 1;
           dWarn("Player " + i + " - placed " + oFruitBush + ": " + placedAmount);
         }
         else {
-          const placedAmount = placeFood(oMainHuntableAnimal, 5, 8, remainingFood, playerPosition, constraints);
+          const placedAmount = placeFoodAmount(oMainHuntableAnimal, 5, 8, remainingFood, playerPosition, constraints);
           remainingFood -= placedAmount;
           dWarn("Player " + i + " - placed " + oMainHuntableAnimal + ": " + placedAmount);
         }
@@ -318,16 +319,16 @@ function placeFoodDesert(playerPlacements, constraints, stragglerConstraints, mu
         let placedAmount = 0;
 
         if (getCivCode(playerIDs[i]) == 'iber') {
-          placedAmount = placeFood(oSecondaryHuntableAnimal, foodQty, foodQty, remainingFood, playerPosition, constraints, 19, 22);
+          placedAmount = placeFoodAmount(oSecondaryHuntableAnimal, foodQty, foodQty, remainingFood, playerPosition, constraints, 19, 22);
         } else {
-          placedAmount = placeFood(oSecondaryHuntableAnimal, foodQty, foodQty, remainingFood, playerPosition, stragglerConstraints, 7, 10);
+          placedAmount = placeFoodAmount(oSecondaryHuntableAnimal, foodQty, foodQty, remainingFood, playerPosition, stragglerConstraints, 7, 10);
         }
 
         remainingFood -= placedAmount;
         dWarn("Player " + i + " - placed " + oSecondaryHuntableAnimal + ": " + placedAmount);
       }
       else if (remainingFood <= 1000) {
-        const placedAmount = placeFood(oSecondaryHuntableAnimal, 5, 7, remainingFood, playerPosition, constraints);
+        const placedAmount = placeFoodAmount(oSecondaryHuntableAnimal, 5, 7, remainingFood, playerPosition, constraints);
         remainingFood -= placedAmount;
         dWarn("Player " + i + " - placed " + oSecondaryHuntableAnimal + ": " + placedAmount);
       }
@@ -335,16 +336,16 @@ function placeFoodDesert(playerPlacements, constraints, stragglerConstraints, mu
         if (remainingBerries > 0 && randBool(0.75)) {
           let placedAmount = 0
           if (getCivCode(playerIDs[i]) == 'iber') {
-            placedAmount = placeFood(oFruitBush, 6, 6, remainingFood, playerPosition, constraints, 27, 30);
+            placedAmount = placeFoodAmount(oFruitBush, 6, 6, remainingFood, playerPosition, constraints, 27, 30);
           } else {
-            placedAmount = placeFood(oFruitBush, 6, 6, remainingFood, playerPosition, constraints);
+            placedAmount = placeFoodAmount(oFruitBush, 6, 6, remainingFood, playerPosition, constraints);
           }
           remainingFood -= placedAmount;
           remainingBerries -= 1;
           dWarn("Player " + i + " - placed " + oFruitBush + ": " + placedAmount);
         }
         else {
-          const placedAmount = placeFood(oMainHuntableAnimal, 5, 8, remainingFood, playerPosition, constraints);
+          const placedAmount = placeFoodAmount(oMainHuntableAnimal, 5, 8, remainingFood, playerPosition, constraints);
           remainingFood -= placedAmount;
           dWarn("Player " + i + " - placed " + oMainHuntableAnimal + ": " + placedAmount);
         }
@@ -378,9 +379,9 @@ function placeFoodTropic(playerPlacements, constraints, stragglerConstraints, mu
  
         let placedAmount = 0
         if (getCivCode(playerIDs[i]) == 'iber') {
-          placedAmount = placeFood(oMainHuntableAnimal, foodQty, foodQty, remainingFood, playerPosition, constraints, 19, 22);
+          placedAmount = placeFoodAmount(oMainHuntableAnimal, foodQty, foodQty, remainingFood, playerPosition, constraints, 19, 22);
         } else {
-          placedAmount = placeFood(oMainHuntableAnimal, foodQty, foodQty, remainingFood, playerPosition, stragglerConstraints, 7, 10);
+          placedAmount = placeFoodAmount(oMainHuntableAnimal, foodQty, foodQty, remainingFood, playerPosition, stragglerConstraints, 7, 10);
         }
         remainingFood -= placedAmount;
 
@@ -389,9 +390,9 @@ function placeFoodTropic(playerPlacements, constraints, stragglerConstraints, mu
       else if (remainingFood <= 800) {
         let placedAmount = 0
         if (getCivCode(playerIDs[i]) == 'iber') {
-          placedAmount = placeFood(oFruitBush, 4, 4, remainingFood, playerPosition, constraints, 27, 30);
+          placedAmount = placeFoodAmount(oFruitBush, 4, 4, remainingFood, playerPosition, constraints, 27, 30);
         } else {
-          placedAmount = placeFood(oFruitBush, 4, 4, remainingFood, playerPosition, constraints);
+          placedAmount = placeFoodAmount(oFruitBush, 4, 4, remainingFood, playerPosition, constraints);
         }
         remainingFood -= placedAmount;
 
@@ -401,16 +402,16 @@ function placeFoodTropic(playerPlacements, constraints, stragglerConstraints, mu
         if (remainingBerries > 0 && randBool(0.7)) {
           let placedAmount = 0
           if (getCivCode(playerIDs[i]) == 'iber') {
-            placedAmount = placeFood(oFruitBush, 5, 6, remainingFood, playerPosition, constraints, 27, 30);
+            placedAmount = placeFoodAmount(oFruitBush, 5, 6, remainingFood, playerPosition, constraints, 27, 30);
           } else {
-            placedAmount = placeFood(oFruitBush, 5, 6, remainingFood, playerPosition, constraints);
+            placedAmount = placeFoodAmount(oFruitBush, 5, 6, remainingFood, playerPosition, constraints);
           }
           remainingFood -= placedAmount;
           remainingBerries -= 1;
           dWarn("Player " + i + " - placed " + oFruitBush + ": " + placedAmount);
         }
         else {
-          const placedAmount = placeFood(oMainHuntableAnimal, 10, 12, remainingFood, playerPosition, constraints);
+          const placedAmount = placeFoodAmount(oMainHuntableAnimal, 10, 12, remainingFood, playerPosition, constraints);
           remainingFood -= placedAmount;
           dWarn("Player " + i + " - placed " + oMainHuntableAnimal + ": " + placedAmount);
         }
@@ -445,15 +446,15 @@ function placeFoodSnowy(playerPlacements, constraints, stragglerConstraints, mul
         let placedAmount = 0;
 
         if (getCivCode(playerIDs[i]) == 'iber') {
-          placedAmount = placeFood(oMainHuntableAnimal, foodQty, foodQty, remainingFood, playerPosition, constraints, 19, 22);
+          placedAmount = placeFoodAmount(oMainHuntableAnimal, foodQty, foodQty, remainingFood, playerPosition, constraints, 19, 22);
         } else {
-          placedAmount = placeFood(oMainHuntableAnimal, foodQty, foodQty, remainingFood, playerPosition, stragglerConstraints, 7, 10);
+          placedAmount = placeFoodAmount(oMainHuntableAnimal, foodQty, foodQty, remainingFood, playerPosition, stragglerConstraints, 7, 10);
         }
         remainingFood -= placedAmount;
         dWarn("Player " + i + " - placed " + oMainHuntableAnimal + ": " + placedAmount);
       }
       else if (remainingFood <= 800) {
-        const placedAmount = placeFood(oSecondaryHuntableAnimal, 2, 2, remainingFood, playerPosition, constraints);
+        const placedAmount = placeFoodAmount(oSecondaryHuntableAnimal, 2, 2, remainingFood, playerPosition, constraints);
         remainingFood -= placedAmount;
         dWarn("Player " + i + " - placed " + oSecondaryHuntableAnimal + ": " + placedAmount);
       }
@@ -461,16 +462,16 @@ function placeFoodSnowy(playerPlacements, constraints, stragglerConstraints, mul
         if (remainingBerries > 0 && randBool(0.65)) {
           let placedAmount = 0
           if (getCivCode(playerIDs[i]) == 'iber') {
-            placedAmount = placeFood(oFruitBush, 6, 6, remainingFood, playerPosition, constraints, 27, 30);
+            placedAmount = placeFoodAmount(oFruitBush, 6, 6, remainingFood, playerPosition, constraints, 27, 30);
           } else {
-            placedAmount = placeFood(oFruitBush, 6, 6, remainingFood, playerPosition, constraints);
+            placedAmount = placeFoodAmount(oFruitBush, 6, 6, remainingFood, playerPosition, constraints);
           }
           remainingFood -= placedAmount;
           remainingBerries -= 1;
           dWarn("Player " + i + " - placed " + oFruitBush + ": " + placedAmount);
         }
         else {
-          const placedAmount = placeFood(oMainHuntableAnimal, 4, 5, remainingFood, playerPosition, constraints);
+          const placedAmount = placeFoodAmount(oMainHuntableAnimal, 4, 5, remainingFood, playerPosition, constraints);
           remainingFood -= placedAmount;
           dWarn("Player " + i + " - placed " + oMainHuntableAnimal + ": " + placedAmount);
         }
@@ -515,15 +516,15 @@ function placeFoodSavanna(playerPlacements, constraints, stragglerConstraints, m
         let placedAmount = 0;
 
         if (getCivCode(playerIDs[i]) == 'iber') {
-          placedAmount = placeFood(oSecondaryHuntableAnimal, foodQty, foodQty, remainingFood, playerPosition, constraints, 19, 22);
+          placedAmount = placeFoodAmount(oSecondaryHuntableAnimal, foodQty, foodQty, remainingFood, playerPosition, constraints, 19, 22);
         } else {
-          placedAmount = placeFood(oSecondaryHuntableAnimal, foodQty, foodQty, remainingFood, playerPosition, stragglerConstraints, 7, 10);
+          placedAmount = placeFoodAmount(oSecondaryHuntableAnimal, foodQty, foodQty, remainingFood, playerPosition, stragglerConstraints, 7, 10);
         }
         remainingFood -= placedAmount;
         dWarn("Player " + i + " - placed " + oSecondaryHuntableAnimal + ": " + placedAmount);
       }
       else if (remainingFood <= 800) {
-        const placedAmount = placeFood(oSecondaryHuntableAnimal, 5, 5, remainingFood, playerPosition, constraints);
+        const placedAmount = placeFoodAmount(oSecondaryHuntableAnimal, 5, 5, remainingFood, playerPosition, constraints);
         remainingFood -= placedAmount;
         dWarn("Player " + i + " - placed " + oSecondaryHuntableAnimal + ": " + placedAmount);
       }
@@ -531,9 +532,9 @@ function placeFoodSavanna(playerPlacements, constraints, stragglerConstraints, m
         if (remainingBerries > 0 && randBool(0.5)) {
           let placedAmount = 0
           if (getCivCode(playerIDs[i]) == 'iber') {
-            placedAmount = placeFood(oFruitBush, 6, 6, remainingFood, playerPosition, constraints, 27, 30);
+            placedAmount = placeFoodAmount(oFruitBush, 6, 6, remainingFood, playerPosition, constraints, 27, 30);
           } else {
-            placedAmount = placeFood(oFruitBush, 6, 6, remainingFood, playerPosition, constraints);
+            placedAmount = placeFoodAmount(oFruitBush, 6, 6, remainingFood, playerPosition, constraints);
           }
           remainingFood -= placedAmount;
           remainingBerries -= 1;
@@ -541,7 +542,7 @@ function placeFoodSavanna(playerPlacements, constraints, stragglerConstraints, m
         }
         else {
           const foodQty = randIntInclusive(2, 3) * 2;
-          const placedAmount = placeFood(oMainHuntableAnimal, foodQty, foodQty, remainingFood, playerPosition, constraints);
+          const placedAmount = placeFoodAmount(oMainHuntableAnimal, foodQty, foodQty, remainingFood, playerPosition, constraints);
           remainingFood -= placedAmount;
           dWarn("Player " + i + " - placed " + oMainHuntableAnimal + ": " + placedAmount);
         }
@@ -571,15 +572,15 @@ function placeFoodEles(playerPlacements, constraints, stragglerConstraints, mult
         let placedAmount = 0;
 
         if (getCivCode(playerIDs[i]) == 'iber') {
-          placedAmount = placeFood(oSecondaryHuntableAnimal, foodQty, foodQty, remainingFood, playerPosition, constraints, 19, 22);
+          placedAmount = placeFoodAmount(oSecondaryHuntableAnimal, foodQty, foodQty, remainingFood, playerPosition, constraints, 19, 22);
         } else {
-          placedAmount = placeFood(oSecondaryHuntableAnimal, foodQty, foodQty, remainingFood, playerPosition, stragglerConstraints, 7, 10);
+          placedAmount = placeFoodAmount(oSecondaryHuntableAnimal, foodQty, foodQty, remainingFood, playerPosition, stragglerConstraints, 7, 10);
         }
         remainingFood -= placedAmount;
         dWarn("Player " + i + " - placed " + oSecondaryHuntableAnimal + ": " + placedAmount);
       }
       else if (remainingFood <= 800) {
-        const placedAmount = placeFood(oSecondaryHuntableAnimal, 5, 5, remainingFood, playerPosition, constraints);
+        const placedAmount = placeFoodAmount(oSecondaryHuntableAnimal, 5, 5, remainingFood, playerPosition, constraints);
         remainingFood -= placedAmount;
         dWarn("Player " + i + " - placed " + oSecondaryHuntableAnimal + ": " + placedAmount);
       }
@@ -587,16 +588,16 @@ function placeFoodEles(playerPlacements, constraints, stragglerConstraints, mult
         if (remainingBerries > 0 && randBool(0.5)) {
           let placedAmount = 0
           if (getCivCode(playerIDs[i]) == 'iber') {
-            placedAmount = placeFood(oFruitBush, 5, 7, remainingFood, playerPosition, constraints, 27, 30);
+            placedAmount = placeFoodAmount(oFruitBush, 5, 7, remainingFood, playerPosition, constraints, 27, 30);
           } else {
-            placedAmount = placeFood(oFruitBush, 5, 7, remainingFood, playerPosition, constraints);
+            placedAmount = placeFoodAmount(oFruitBush, 5, 7, remainingFood, playerPosition, constraints);
           }
           remainingFood -= placedAmount;
           remainingBerries -= 1;
           dWarn("Player " + i + " - placed " + oFruitBush + ": " + placedAmount);
         }
         else {
-          const placedAmount = placeFood(oMainHuntableAnimal, 1, 1, remainingFood, playerPosition, constraints);
+          const placedAmount = placeFoodAmount(oMainHuntableAnimal, 1, 1, remainingFood, playerPosition, constraints);
           remainingFood -= placedAmount;
           dWarn("Player " + i + " - placed " + oMainHuntableAnimal + ": " + placedAmount);
         }
@@ -626,15 +627,15 @@ function placeFoodGiraffes(playerPlacements, constraints, stragglerConstraints, 
         let placedAmount = 0;
 
         if (getCivCode(playerIDs[i]) == 'iber') {
-          placedAmount = placeFood(oSecondaryHuntableAnimal, foodQty, foodQty, remainingFood, playerPosition, constraints, 19, 22);
+          placedAmount = placeFoodAmount(oSecondaryHuntableAnimal, foodQty, foodQty, remainingFood, playerPosition, constraints, 19, 22);
         } else {
-          placedAmount = placeFood(oSecondaryHuntableAnimal, foodQty, foodQty, remainingFood, playerPosition, stragglerConstraints, 7, 10);
+          placedAmount = placeFoodAmount(oSecondaryHuntableAnimal, foodQty, foodQty, remainingFood, playerPosition, stragglerConstraints, 7, 10);
         }
         remainingFood -= placedAmount;
         dWarn("Player " + i + " - placed " + oSecondaryHuntableAnimal + ": " + placedAmount);
       }
       else if (remainingFood <= 1400) {
-        const placedAmount = placeFood(oSecondaryHuntableAnimal, 5, 6, remainingFood, playerPosition, constraints);
+        const placedAmount = placeFoodAmount(oSecondaryHuntableAnimal, 5, 6, remainingFood, playerPosition, constraints);
         remainingFood -= placedAmount;
         dWarn("Player " + i + " - placed " + oSecondaryHuntableAnimal + ": " + placedAmount);
       }
@@ -642,9 +643,9 @@ function placeFoodGiraffes(playerPlacements, constraints, stragglerConstraints, 
         if (remainingBerries > 0 && randBool(0.5)) {
           let placedAmount = 0
           if (getCivCode(playerIDs[i]) == 'iber') {
-            placedAmount = placeFood(oFruitBush, 5, 7, remainingFood, playerPosition, constraints, 27, 30);
+            placedAmount = placeFoodAmount(oFruitBush, 5, 7, remainingFood, playerPosition, constraints, 27, 30);
           } else {
-            placedAmount = placeFood(oFruitBush, 5, 7, remainingFood, playerPosition, constraints);
+            placedAmount = placeFoodAmount(oFruitBush, 5, 7, remainingFood, playerPosition, constraints);
           }
           remainingFood -= placedAmount;
           remainingBerries -= 1;
@@ -652,7 +653,7 @@ function placeFoodGiraffes(playerPlacements, constraints, stragglerConstraints, 
         }
         else {
           const foodQty = 4; // must be fixed at the moment
-          const placedAmount = placeFood(oMainHuntableAnimal, foodQty, foodQty, remainingFood, playerPosition, constraints);
+          const placedAmount = placeFoodAmount(oMainHuntableAnimal, foodQty, foodQty, remainingFood, playerPosition, constraints);
           remainingFood -= placedAmount;
           dWarn("Player " + i + " - placed " + oMainHuntableAnimal + ": " + placedAmount);
         }

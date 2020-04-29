@@ -1,0 +1,9 @@
+{
+	"settings" : {
+		"Name" : "Britannic Road",
+		"Script" : "britannic_road.js",
+		"Description" : "Britannic Road",
+		"Preview" : "lorraine_plain.png",
+		"CircularMap" : true
+	}
+}

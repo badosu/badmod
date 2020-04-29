@@ -176,12 +176,12 @@ for (let i = 0; i < numPlayers; ++i)
   );
 }
 
-placeBalancedMinerals(playerPositions, avoidClasses(clWater, 6));
-
 const constraints = avoidClasses(clHill, 1, clMetal, 4, clRock, 4, clFood, 10, clWater, 2);
 const stragglerConstraints = avoidClasses(clHill, 1, clMetal, 4, clRock, 4, clBaseResource, 10, clFood, 10, clWater, 2);
 const foodMultiplier = 0.5; // Fishing is map dynamic
 placeBalancedFood(playerPlacements, constraints, stragglerConstraints, foodMultiplier);
+
+placeBalancedMinerals(playerPositions, avoidClasses(clWater, 6));
 
 paintTerrainBasedOnHeight(2.4, 3.4, 3, tMainTerrain);
 paintTerrainBasedOnHeight(1, 2.4, 0, tShore);
@@ -200,7 +200,7 @@ else
 Engine.SetProgress(40);
 
 if (currentBiome() != "generic/savanna") {
-  createPlayerForests(
+  createBalancedPlayerForests(
    playerPositions,
    [tMainTerrain, tForestFloor1, tForestFloor2, pForest1, pForest2],
    avoidClasses(clForest, 18, clHill, 0, clMetal, 4, clRock, 4, clFood, 4, clWater, 4),

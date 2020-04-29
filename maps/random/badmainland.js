@@ -96,16 +96,16 @@ else
 
 const [playerIDs, playerPositions, playerAngles] = playerPlacements;
 
-placeBalancedMinerals(playerPositions);
-
 let constraints = avoidClasses(clHill, 1, clMetal, 4, clRock, 4, clFood, 10);
 let stragglerConstraints = avoidClasses(clHill, 1, clMetal, 4, clRock, 4, clBaseResource, 10, clFood, 10);
 placeBalancedFood(playerPlacements, constraints, stragglerConstraints);
 
+placeBalancedMinerals(playerPositions);
+
 Engine.SetProgress(40);
 
 if (currentBiome() != "generic/savanna") {
-  createPlayerForests(
+  createBalancedPlayerForests(
    playerPositions,
    [tMainTerrain, tForestFloor1, tForestFloor2, pForest1, pForest2],
    avoidClasses(clForest, 18, clHill, 0, clMetal, 4, clRock, 4, clFood, 4),
