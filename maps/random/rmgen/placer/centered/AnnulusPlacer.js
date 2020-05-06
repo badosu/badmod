@@ -33,6 +33,5 @@ AnnulusPlacer.prototype.place = function(constraint = new NullConstraint())
         points.push(it.clone());
     }
 
-  warn('AAA ' + points.length);
   return points;
 };

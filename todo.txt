@@ -4,3 +4,5 @@
 - Balanced mainland no first hunt when hills present
 - Include fig/apple trees in generator
 - mineral gen 0-2 1v1, 0-3 tg
+- 8 players tiny fix wrench/cross
+- 8 players wrench small

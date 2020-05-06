@@ -33,7 +33,5 @@ ODiskPlacer.prototype.place = function(constraint)
 				points.push(it.clone());
 		}
 
-  warn('LLL ' + points.length);
-
 	return points;
 };
