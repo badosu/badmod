@@ -3,7 +3,7 @@
 		"Name" : "Britannic Road",
 		"Script" : "britannic_road.js",
 		"Description" : "Britannic Road",
-		"Preview" : "lorraine_plain.png",
+		"Preview" : "britannic_road.png",
 		"CircularMap" : true
 	}
 }
