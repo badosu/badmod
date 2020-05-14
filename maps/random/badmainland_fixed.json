@@ -1,0 +1,10 @@
+{
+	"settings" : {
+		"Name" : "Balanced Mainland (fixed)",
+		"Script" : "badmainland_fixed.js",
+		"Description" : "A typical map without any water. Resources are distributed evenly between players. Positions defined by players",
+		"Preview" : "mainland_temperate.png",
+		"SupportedBiomes": "generic/",
+		"CircularMap" : true
+	}
+}

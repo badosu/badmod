@@ -1,0 +1,10 @@
+{
+	"settings" : {
+		"Name" : "Wrench (fixed)",
+		"Script" : "wrench_fixed.js",
+		"Description" : "Players start side by side, protected by mountains, extra minerals on border. Positions defined by players",
+		"Preview" : "wrench.png",
+		"SupportedBiomes": "generic/",
+		"CircularMap" : true
+	}
+}

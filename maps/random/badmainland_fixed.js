@@ -54,7 +54,14 @@ var clMetal = g_Map.createTileClass();
 var clFood = g_Map.createTileClass();
 var clBaseResource = g_Map.createTileClass();
 
-const playerPlacements = playerPlacementCircle(fractionToTiles(0.30));
+var playerPlacements = playerPlacementCircle(fractionToTiles(0.30));
+let [playersOrder, playerPositions, playerAngles] = playerPlacements;
+
+let playerIDs = [];
+for (let i = 0; i < numPlayers; ++i)
+  playerIDs.push(i+1);
+
+playerPlacements[0] = playerIDs;
 
 placePlayerBases({
 	"PlayerPlacement": playerPlacements,
