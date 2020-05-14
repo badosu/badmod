@@ -16,7 +16,7 @@ ODiskPlacer.prototype.setCenterPosition = function(position)
 	this.centerPosition = deepfreeze(position.clone().round());
 };
 
-ODiskPlacer.prototype.place = function(constraint)
+ODiskPlacer.prototype.place = function(constraint = new NullConstraint())
 {
 	let points = [];
 

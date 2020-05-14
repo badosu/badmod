@@ -79,17 +79,6 @@ function placeFoodAmount(type, min, max, foodAmount, playerPosition, constraints
   return amountPlaced * foodValues[type];
 }
 
-function nearPlacing(object, tileClass, constraints, position, variance) {
-  const placeFunc = function() {
-    const tryPosition = Vector2D.add(position, new Vector2D(randIntInclusive(-variance, variance), randIntInclusive(-variance, variance))).round();
-    const group = new SimpleGroup([object], true, tileClass, tryPosition);
-
-    return group.place(0, new AndConstraint(constraints));
-  };
-
-  retryPlacing(placeFunc, 500, 1, true);
-}
-
 function placeBalancedFood(playerPlacements, constraints, stragglerConstraints, multiplier = 1) {
   const biome = currentBiome() || 'generic/temperate';
   dWarn('Placing food for biome: ' + biome);

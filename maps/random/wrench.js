@@ -56,36 +56,36 @@ var clMetal = g_Map.createTileClass();
 var clFood = g_Map.createTileClass();
 var clBaseResource = g_Map.createTileClass();
 
-const wrenchScaling = 8 * (numPlayers - 2);
+const wrenchScaling = 10 * (numPlayers - 2);
 const playersCircleRadius = 28 + wrenchScaling;
 const playerPlacements = playerPlacementCircle(playersCircleRadius);
 
 placePlayerBases({
-	"PlayerPlacement": playerPlacements,
-	"PlayerTileClass": clPlayer,
-	"BaseResourceClass": clBaseResource,
-	"CityPatch": {
-		"outerTerrain": tRoadWild,
-		"innerTerrain": tRoad
-	},
-	"Chicken": {
-	},
-	"Berries": {
-		"template": oFruitBush
-	},
-	"Mines": {
-		"types": [
-			{ "template": oMetalLarge },
-			{ "template": oStoneLarge }
-		]
-	},
-	"Trees": {
-		"template": oTree1,
-		"count": 5
-	},
-	"Decoratives": {
-		"template": aGrassShort
-	}
+  "PlayerPlacement": playerPlacements,
+  "PlayerTileClass": clPlayer,
+  "BaseResourceClass": clBaseResource,
+  "CityPatch": {
+    "outerTerrain": tRoadWild,
+    "innerTerrain": tRoad
+  },
+  "Chicken": {
+  },
+  "Berries": {
+    "template": oFruitBush
+  },
+  "Mines": {
+    "types": [
+      { "template": oMetalLarge },
+      { "template": oStoneLarge }
+    ]
+  },
+  "Trees": {
+    "template": oTree1,
+    "count": 5
+  },
+  "Decoratives": {
+    "template": aGrassShort
+  }
 });
 Engine.SetProgress(20);
 
@@ -97,70 +97,74 @@ const minesVariation = randIntInclusive(2, 12);
 for (let i = 0; i < numPlayers; ++i) {
   const playerAngle = playerAngles[i];
   const offsetAngle = Math.PI / numPlayers;
-  const minesRadius = playersCircleRadius + numPlayers * 3.5 + minesVariation;
+  const minesRadius = playersCircleRadius + numPlayers * 3 + minesVariation;
   const minesPoint = new Vector2D(minesRadius).rotate(- playerAngle - offsetAngle);
-  const minesPosition = Vector2D.add(mapCenter, minesPoint).round();
-
-  nearPlacing(
-    new SimpleObject(oMetalLarge, 1, 1, 0, 4),
-    clMetal, 
-    avoidClasses(clForest, 6, clHill, 7),
-    minesPosition,
-    3
+  const minesArea = new Area(
+    new ODiskPlacer(2.2, Vector2D.add(mapCenter, minesPoint).round()).place()
   );
 
-  nearPlacing(
-    new SimpleObject(oStoneLarge, 1, 1, 0, 4),
-    clRock, 
-    avoidClasses(clForest, 6, clHill, 7, clMetal, 4),
-    minesPosition,
-    3
+  createObjectGroupsByAreas(
+    new SimpleGroup([new SimpleObject(oMetalLarge, 1, 1, 0, 4)], true, clMetal),
+    0,
+    avoidClasses(clForest, 6, clHill, 7),
+    1, 400,
+    [minesArea]
+  );
+
+  createObjectGroupsByAreas(
+    new SimpleGroup([new SimpleObject(oStoneLarge, 1, 1, 0, 4)], true, clRock),
+    0,
+    avoidClasses(clForest, 6, clHill, 7, clMetal, 6),
+    1, 400,
+    [minesArea]
   );
 
   const minesClumpPosition = new Vector2D(minesRadius - 15).rotate(- playerAngle - offsetAngle);
-  const wrenchHeadSize = (mapSize > 128) ? 1100 : 700;
+  const wrenchHeadSize = 20;
   createArea(
-  	new ClumpPlacer(wrenchHeadSize, 0.97, 0.8, Infinity, Vector2D.add(mapCenter, minesClumpPosition).round()),
+    new ODiskPlacer(wrenchHeadSize, Vector2D.add(mapCenter, minesClumpPosition).round()),
     [
-  			new TerrainPainter(tCliff),
-  			new SmoothElevationPainter(ELEVATION_SET, 24, 1),
-  			new TileClassPainter(clWrenchHead)
+      new TerrainPainter(tCliff),
+      new SmoothElevationPainter(ELEVATION_SET, 24, 1),
+      new TileClassPainter(clWrenchHead)
     ],
-  	avoidClasses(clPlayer, 18, clMetal, 9, clRock, 9)
+    avoidClasses(clPlayer, 18, clMetal, 9, clRock, 9)
   );
 
-
+  // If map is not tiny, create metal and stone far from each player near edges
   if (mapSize > 128) {
-    nearPlacing(
-      new SimpleObject(oStoneLarge, 1, 1, 0, 4),
-      clRock,
+    createObjectGroupsByAreas(
+      new SimpleGroup([new SimpleObject(oStoneLarge, 1, 1, 0, 4)], true, clRock),
+      0,
       avoidClasses(clForest, 6, clHill, 7),
-      Vector2D.add(mapCenter, new Vector2D(fractionToTiles(0.42), 0).rotate(- playerAngle + offsetAngle / 3)).round(),
-      5
+      1, 400,
+      [new Area(new ODiskPlacer(3, Vector2D.add(mapCenter, new Vector2D(fractionToTiles(0.42), 0).rotate(- playerAngle + offsetAngle / 3)).round()).place())]
     );
 
-    nearPlacing(
-      new SimpleObject(oMetalLarge, 1, 1, 0, 4),
-      clMetal,
+    createObjectGroupsByAreas(
+      new SimpleGroup([new SimpleObject(oMetalLarge, 1, 1, 0, 4)], true, clMetal),
+      0,
       avoidClasses(clForest, 6, clHill, 7),
-      Vector2D.add(mapCenter, new Vector2D(fractionToTiles(0.42), 0).rotate(- playerAngle - offsetAngle / 3)).round(),
-      5
+      1, 400,
+      [new Area(new ODiskPlacer(3, Vector2D.add(mapCenter, new Vector2D(fractionToTiles(0.42), 0).rotate(- playerAngle - offsetAngle / 3)).round()).place())]
     );
   }
+
+  Engine.SetProgress(20 + i);
 }
 
-Engine.SetProgress(25);
-
-const handleSize = (mapSize > 128) ? 2800 + (numPlayers - 2) * 4000 : 3000;
+const handleSize = 30 + 11.5 * (numPlayers - 2);
 createArea(
-	new ClumpPlacer(handleSize, 0.97, 0.8, Infinity, mapCenter),
+  new ODiskPlacer(handleSize, mapCenter),
   [
-			new TerrainPainter(tCliff),
-			new SmoothElevationPainter(ELEVATION_SET, 24, 1),
-			new TileClassPainter(clHill)
+    new TerrainPainter(tCliff),
+    new SmoothElevationPainter(ELEVATION_SET, 24, 1),
+    new TileClassPainter(clHill)
   ],
-	avoidClasses(clPlayer, Math.floor(17 + numPlayers / 2), clMetal, 10, clRock, 10)
+  avoidClasses(clPlayer, 18, clMetal, 10, clRock, 10)
 );
+
+Engine.SetProgress(35);
 
 createBumps(avoidClasses(clPlayer, 20, clMetal, 6, clRock, 6));
 
@@ -170,73 +174,77 @@ let constraints = avoidClasses(clHill, 1, clMetal, 4, clRock, 4, clFood, 10, clW
 let stragglerConstraints = avoidClasses(clHill, 1, clMetal, 4, clRock, 4, clBaseResource, 10, clFood, 10, clWrenchHead, 1);
 placeBalancedFood(playerPlacements, constraints, stragglerConstraints);
 
+Engine.SetProgress(45);
+
 if (randBool())
-  createHills([tCliff, tCliff, tHill], avoidClasses(clPlayer, 35, clHill, 15, clMetal, 10, clRock, 10, clWrenchHead, 20, clFood, 4), clHill, scaleByMapSize(2, 11));
+  createHills([tCliff, tCliff, tHill], avoidClasses(clPlayer, 42, clHill, 15, clMetal, 10, clRock, 10, clWrenchHead, 20, clFood, 4), clHill, scaleByMapSize(2, 11));
 else
-  createMountains(tCliff, avoidClasses(clPlayer, 35, clHill, 15, clMetal, 10, clRock, 10, clWrenchHead, 20, clFood, 4), clHill, scaleByMapSize(2, 11));
+  createMountains(tCliff, avoidClasses(clPlayer, 42, clHill, 15, clMetal, 10, clRock, 10, clWrenchHead, 20, clFood, 4), clHill, scaleByMapSize(2, 11));
+
+Engine.SetProgress(48);
 
 if (currentBiome() != "generic/savanna") {
   createBalancedPlayerForests(
-   playerPositions,
-   [tMainTerrain, tForestFloor1, tForestFloor2, pForest1, pForest2],
-   avoidClasses(clForest, 18, clHill, 2, clMetal, 4, clRock, 4, clFood, 4, clWrenchHead, 4),
-   clForest);
+    playerPositions,
+    [tMainTerrain, tForestFloor1, tForestFloor2, pForest1, pForest2],
+    avoidClasses(clForest, 6, clHill, 2, clMetal, 4, clRock, 4, clFood, 4, clWrenchHead, 4),
+    clForest);
 }
+
+Engine.SetProgress(50);
 
 const [forestTrees, stragglerTrees] = getTreeCounts(...rBiomeTreeCount(1));
 
 createForests(
- [tMainTerrain, tForestFloor1, tForestFloor2, pForest1, pForest2],
- avoidClasses(clPlayer, 20, clForest, 15, clHill, 1, clMetal, 6, clRock, 6, clFood, 6, clWrenchHead, 10),
- clForest,
- forestTrees);
+  [tMainTerrain, tForestFloor1, tForestFloor2, pForest1, pForest2],
+  avoidClasses(clPlayer, 18, clForest, 15, clHill, 1, clMetal, 6, clRock, 6, clFood, 6, clWrenchHead, 9),
+  clForest,
+  forestTrees);
 
-Engine.SetProgress(50);
+Engine.SetProgress(60);
 
 g_Map.log("Creating dirt patches");
 createLayeredPatches(
- [scaleByMapSize(3, 6), scaleByMapSize(5, 10), scaleByMapSize(8, 21)],
- [[tMainTerrain,tTier1Terrain],[tTier1Terrain,tTier2Terrain], [tTier2Terrain,tTier3Terrain]],
- [1, 1],
- avoidClasses(clForest, 0, clHill, 0, clDirt, 5, clPlayer, 12, clWrenchHead, 2),
- scaleByMapSize(15, 45),
- clDirt);
+  [scaleByMapSize(3, 6), scaleByMapSize(5, 10), scaleByMapSize(8, 21)],
+  [[tMainTerrain,tTier1Terrain],[tTier1Terrain,tTier2Terrain], [tTier2Terrain,tTier3Terrain]],
+  [1, 1],
+  avoidClasses(clForest, 0, clHill, 0, clDirt, 5, clPlayer, 12, clWrenchHead, 2),
+  scaleByMapSize(15, 45),
+  clDirt);
+
+Engine.SetProgress(63);
 
 g_Map.log("Creating grass patches");
 createPatches(
- [scaleByMapSize(2, 4), scaleByMapSize(3, 7), scaleByMapSize(5, 15)],
- tTier4Terrain,
- avoidClasses(clForest, 0, clHill, 0, clDirt, 5, clPlayer, 12, clWrenchHead, 2),
- scaleByMapSize(15, 45),
- clDirt);
-
-Engine.SetProgress(55);
-
-Engine.SetProgress(60);
+  [scaleByMapSize(2, 4), scaleByMapSize(3, 7), scaleByMapSize(5, 15)],
+  tTier4Terrain,
+  avoidClasses(clForest, 0, clHill, 0, clDirt, 5, clPlayer, 12, clWrenchHead, 2),
+  scaleByMapSize(15, 45),
+  clDirt);
 
 Engine.SetProgress(65);
 
 var planetm = 1;
 
 if (currentBiome() == "generic/tropic")
-	planetm = 8;
+  planetm = 8;
 
 createDecoration(
-	[
-		[new SimpleObject(aRockMedium, 1, 3, 0, 1)],
-		[new SimpleObject(aRockLarge, 1, 2, 0, 1), new SimpleObject(aRockMedium, 1, 3, 0, 2)],
-		[new SimpleObject(aGrassShort, 1, 2, 0, 1)],
-		[new SimpleObject(aGrass, 2, 4, 0, 1.8), new SimpleObject(aGrassShort, 3,6, 1.2, 2.5)],
-		[new SimpleObject(aBushMedium, 1, 2, 0, 2), new SimpleObject(aBushSmall, 2, 4, 0, 2)]
-	],
-	[
-		scaleByMapSize(16, 262),
-		scaleByMapSize(8, 131),
-		planetm * scaleByMapSize(13, 200),
-		planetm * scaleByMapSize(13, 200),
-		planetm * scaleByMapSize(13, 200)
-	],
-	avoidClasses(clForest, 0, clPlayer, 0, clHill, 0, clWrenchHead, 0));
+  [
+    [new SimpleObject(aRockMedium, 1, 3, 0, 1)],
+    [new SimpleObject(aRockLarge, 1, 2, 0, 1), new SimpleObject(aRockMedium, 1, 3, 0, 2)],
+    [new SimpleObject(aGrassShort, 1, 2, 0, 1)],
+    [new SimpleObject(aGrass, 2, 4, 0, 1.8), new SimpleObject(aGrassShort, 3,6, 1.2, 2.5)],
+    [new SimpleObject(aBushMedium, 1, 2, 0, 2), new SimpleObject(aBushSmall, 2, 4, 0, 2)]
+  ],
+  [
+    scaleByMapSize(16, 262),
+    scaleByMapSize(8, 131),
+    planetm * scaleByMapSize(13, 200),
+    planetm * scaleByMapSize(13, 200),
+    planetm * scaleByMapSize(13, 200)
+  ],
+  avoidClasses(clForest, 0, clPlayer, 0, clHill, 0, clWrenchHead, 0));
 
 Engine.SetProgress(70);
 
@@ -245,15 +253,19 @@ createBadFood(avoidClasses(clForest, 0, clHill, 1, clMetal, 4, clRock, 4, clFood
 Engine.SetProgress(85);
 
 createStragglerTrees(
-	[oTree1, oTree2, oTree4, oTree3],
-	avoidClasses(
+  [oTree1, oTree2, oTree4, oTree3],
+  avoidClasses(
     clForest, 8, clHill, 1, clPlayer,
     currentBiome() === "generic/savanna" ? 12 : 30,
     clMetal, 6, clRock, 6, clFood, 1, clWrenchHead, 10
   ),
-	clForest,
-	stragglerTrees);
+  clForest,
+  stragglerTrees);
+
+Engine.SetProgress(90);
 
 placePlayersNomad(clPlayer, avoidClasses(clForest, 1, clMetal, 4, clRock, 4, clHill, 4, clFood, 2, clWrenchHead, 10));
+
+Engine.SetProgress(95);
 
 g_Map.ExportMap();
