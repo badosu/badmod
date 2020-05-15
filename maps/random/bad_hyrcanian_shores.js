@@ -128,10 +128,12 @@ Engine.SetProgress(20);
 
 for (let i = 0; i < numPlayers; ++i)
 {
-  nearPlacing(
-    new SimpleObject(oFish, 3, 3, 0, 4),
-    clFood, stayClasses(clWater, 3),
-    Vector2D.add(playerPositions[i], new Vector2D(65).rotate(actualAngle - Math.PI / 2)), 2
+  createObjectGroupsByAreas(
+    new SimpleGroup([new SimpleObject(oFish, 3, 3, 0, 4)], true, clFood),
+    0,
+    stayClasses(clWater, 3),
+    1, 400,
+    [new Area(new ODiskPlacer(3, Vector2D.add(playerPositions[i], new Vector2D(65).rotate(actualAngle - Math.PI / 2))).place())]
   );
 }
 
