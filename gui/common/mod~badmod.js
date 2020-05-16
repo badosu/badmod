@@ -1,4 +1,4 @@
-global["balancedMapsCompatibilityMatcher"] = new RegExp('^0\\.18(\\.|$)', 'i');
+global["balancedMapsCompatibilityMatcher"] = new RegExp('^0\\.19(\\.|$)', 'i');
 
 autociv_patchApplyN("hasSameMods", function (target, that, args)
 {
@@ -14,7 +14,7 @@ autociv_patchApplyN("hasSameMods", function (target, that, args)
 
 autociv_patchApplyN("hasSameMods", function (target, that, args)
 {
-  let nameFilter = ([name]) => !/^balanced[-_]maps.*/i.test(name);
+  let nameFilter = (name) => !/^balanced[-_]maps.*/i.test(name);
   let compatibilityFilter = ([name, version]) => (nameFilter(name) || global["balancedMapsCompatibilityMatcher"].test(version));
 
   if (args[0].every(compatibilityFilter)) {
