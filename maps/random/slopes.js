@@ -1,3 +1,44 @@
+/**
+ * Places uniformly sized forests at random locations.
+ * Generates two variants of forests from the given terrain textures and tree templates.
+ * The forest border has less trees than the inside.
+ */
+function createForestsInArea(area, terrainSet, constraint, tileClass, treeCount, retryFactor = 400)
+{
+  if (!treeCount)
+    return;
+
+  // Construct different forest types from the terrain textures and template names.
+  let [mainTerrain, terrainForestFloor1, terrainForestFloor2, terrainForestTree1, terrainForestTree2] = terrainSet;
+
+  // The painter will pick a random Terrain for each part of the forest.
+  let forestVariants = [
+    {
+      "borderTerrains": [terrainForestFloor2, mainTerrain, terrainForestTree1],
+      "interiorTerrains": [terrainForestFloor2, terrainForestTree1]
+    },
+    {
+      "borderTerrains": [terrainForestFloor1, mainTerrain, terrainForestTree2],
+      "interiorTerrains": [terrainForestFloor1, terrainForestTree2]
+    }
+  ];
+
+  g_Map.log("Creating forests");
+  let numberOfForests = Math.floor(treeCount / (scaleByMapSize(3, 6) * getNumPlayers() * forestVariants.length));
+  for (let forestVariant of forestVariants) {
+    createAreasInAreas(
+      new ChainPlacer(1, Math.floor(scaleByMapSize(3, 5)), treeCount / numberOfForests, 0.5),
+      [
+        new LayeredPainter([forestVariant.borderTerrains, forestVariant.interiorTerrains], [2]),
+        new TileClassPainter(tileClass)
+      ],
+      constraint,
+      numberOfForests,
+      retryFactor,
+      [area]);
+  }
+}
+
 Engine.LoadLibrary("rmgen");
 Engine.LoadLibrary("rmgen-common");
 Engine.LoadLibrary("rmbiome");
@@ -214,13 +255,25 @@ createArea(
 //   clForest);
 //}
 //
-//var [forestTrees, stragglerTrees] = getTreeCounts(...rBiomeTreeCount(1));
-//createForests(
-// [tMainTerrain, tForestFloor1, tForestFloor2, pForest1, pForest2],
-// avoidClasses(clPlayer, 30, clForest, 18, clHill, 1, clMetal, 4, clRock, 4, clFood, 4),
-// clForest,
-// forestTrees);
-//
+const [forestTrees, stragglerTrees] = getTreeCounts(...rBiomeTreeCount(1));
+const leftPlateauArea = new Area(leftPlateauPlacer.place(avoidClasses(clWater, 4)));
+const rightPlateauArea = new Area(rightPlateauPlacer.place(avoidClasses(clWater, 4)));
+const plateauTrees = Math.round(forestTrees / 2);
+
+createForestsInArea(
+ leftPlateauArea,
+ [tMainTerrain, tForestFloor1, tForestFloor2, pForest1, pForest2],
+ avoidClasses(clPlayer, 30, clForest, 18, clHill, 1, clMetal, 4, clRock, 4, clFood, 4),
+ clForest,
+ plateauTrees);
+
+createForestsInArea(
+ rightPlateauArea,
+ [tMainTerrain, tForestFloor1, tForestFloor2, pForest1, pForest2],
+ avoidClasses(clPlayer, 30, clForest, 18, clHill, 1, clMetal, 4, clRock, 4, clFood, 4),
+ clForest,
+ plateauTrees);
+
 //Engine.SetProgress(50);
 //
 //g_Map.log("Creating dirt patches");
