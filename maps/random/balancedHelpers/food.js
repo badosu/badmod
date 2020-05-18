@@ -35,6 +35,7 @@ const foodValues = {
   'gaia/fauna_walrus': 300,     // s snowy
   'gaia/fauna_tiger': 0,        // s tropic
   'gaia/flora_bush_berry': 100,
+  'gaia/flora_bush_grapes': 100, // mediterranean random occurrence
   'gaia/flora_bush_berry_desert': 100,
 };
 
