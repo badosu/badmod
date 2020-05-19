@@ -1,4 +1,3 @@
-
 Engine.LoadLibrary("rmgen");
 Engine.LoadLibrary("rmgen-common");
 Engine.LoadLibrary("rmbiome");
@@ -64,8 +63,42 @@ var clWater = g_Map.createTileClass();
 
 const playerDistance = fractionToTiles(0.6);
 const playerEdgeDistance = Math.round((mapSize - playerDistance) / 2);
-const playerPositions = [new Vector2D(halfMapSize, playerEdgeDistance), new Vector2D(halfMapSize, playerEdgeDistance + playerDistance)];
-const playerPlacements = [sortAllPlayers(), playerPositions];
+
+const firstPlayerGroupSize = Math.floor(numPlayers / 2);
+const secondPlayerGroupSize = numPlayers - firstPlayerGroupSize;
+const playerIDs = sortAllPlayers();
+
+let playerPositions = [];
+
+if (firstPlayerGroupSize == 1) {
+  playerPositions.push(new Vector2D(halfMapSize, playerEdgeDistance))
+} else if (firstPlayerGroupSize > 1) {
+  const offset = (firstPlayerGroupSize - 2) * 6;
+  const startAngle = Math.min(firstPlayerGroupSize - 2, 1) * Math.PI / Math.pow(2, firstPlayerGroupSize - 2);
+
+  playerPositions = playerPositions.concat(distributePointsOnCircle(
+    firstPlayerGroupSize,
+    startAngle,
+    20 + firstPlayerGroupSize * 5,
+    new Vector2D(halfMapSize, playerEdgeDistance + offset)
+  )[0]);
+}
+
+if (secondPlayerGroupSize == 1) {
+  playerPositions.push(new Vector2D(halfMapSize, playerEdgeDistance + playerDistance));
+} else if (secondPlayerGroupSize > 1) {
+  const offset = (secondPlayerGroupSize - 2) * 6;
+  const startAngle = Math.min(secondPlayerGroupSize - 2, 1) * Math.PI / Math.pow(2, secondPlayerGroupSize - 2);
+
+  playerPositions = playerPositions.concat(distributePointsOnCircle(
+    secondPlayerGroupSize,
+    -startAngle,
+    20 + secondPlayerGroupSize * 5,
+    new Vector2D(halfMapSize, playerEdgeDistance + playerDistance - offset)
+  )[0]);
+}
+
+const playerPlacements = [playerIDs, playerPositions];
 
 placePlayerBases({
 	"PlayerPlacement": playerPlacements,
@@ -98,12 +131,17 @@ placePlayerBases({
 Engine.SetProgress(10);
 
 const heightTop = heightLand + 5;
-const lowlandsWidth = fractionToTiles(0.4);
+const lowlandsWidth = fractionToTiles(0.36);
 const rampWidth = fractionToTiles(0.05);
 const elevationPainter = new ElevationPainter(heightTop);
 
-const rightPlateauPlacer = new RectPlacer(new Vector2D(halfMapSize + lowlandsWidth / 2 + rampWidth, mapSize), new Vector2D(mapSize, 0));
-const leftPlateauPlacer = new RectPlacer(new Vector2D(0, mapSize), new Vector2D(halfMapSize - lowlandsWidth / 2 - rampWidth, 0));
+const rightRampStartX = halfMapSize + lowlandsWidth / 2;
+const rightRampEndX = rightRampStartX + rampWidth;
+const leftRampStartX = halfMapSize - lowlandsWidth / 2;
+const leftRampEndX = leftRampStartX - rampWidth;
+
+const rightPlateauPlacer = new RectPlacer(new Vector2D(rightRampEndX, mapSize), new Vector2D(mapSize, 0));
+const leftPlateauPlacer = new RectPlacer(new Vector2D(0, mapSize), new Vector2D(leftRampEndX, 0));
 
 createArea(rightPlateauPlacer, elevationPainter);
 Engine.SetProgress(12);
@@ -111,8 +149,8 @@ createArea(leftPlateauPlacer, elevationPainter);
 Engine.SetProgress(14);
 
 createPassage({
-  "start": new Vector2D(halfMapSize + lowlandsWidth / 2, halfMapSize),
-  "end": new Vector2D(halfMapSize + rampWidth + lowlandsWidth / 2, halfMapSize),
+  "start": new Vector2D(rightRampStartX, halfMapSize),
+  "end": new Vector2D(rightRampEndX, halfMapSize),
   "startWidth": mapSize,
   "endWidth": mapSize,
   "smoothWidth": 2,
@@ -123,8 +161,8 @@ createPassage({
 Engine.SetProgress(16);
 
 createPassage({
-  "start": new Vector2D(halfMapSize - lowlandsWidth / 2, halfMapSize),
-  "end": new Vector2D(halfMapSize - rampWidth - lowlandsWidth / 2, halfMapSize),
+  "start": new Vector2D(leftRampStartX, halfMapSize),
+  "end": new Vector2D(leftRampEndX, halfMapSize),
   "startWidth": mapSize,
   "endWidth": mapSize,
   "smoothWidth": 2,
@@ -136,13 +174,26 @@ Engine.SetProgress(18);
 
 const heightWaterLevel = heightTop - 7;
 
+const fish = new SimpleGroup([new SimpleObject(oFish, 2, 2, 0, 2)], true, clFood);
+const stone = new SimpleGroup(
+  [new SimpleObject(oStoneLarge, 1, 1, 0, 4, 0, 2 * Math.PI, 4)],
+  true,
+  clRock
+);
+const metal = new SimpleGroup(
+  [new SimpleObject(oMetalLarge, 1, 1, 0, 4)],
+  true,
+  clMetal
+);
+
+
 function createSideLakes(xDistance, yDistance) {
   const stoneRight = randBool();
   let mineralDistribution = [stoneRight, !stoneRight];
 
   for (let x of [halfMapSize + xDistance, halfMapSize - xDistance]) {
     const position = new Vector2D(x, halfMapSize + yDistance);
-    const lakeSize = 22;
+    const lakeSize = scaleByMapSize(14, 38);
     const placer = new ChainPlacer(
       2,
       Math.floor(scaleByMapSize(3, 8)),
@@ -162,45 +213,19 @@ function createSideLakes(xDistance, yDistance) {
       new NullConstraint()
     );
 
-    let fish = new SimpleGroup(
-      [new SimpleObject(oFish, 2, 2, 0, 2)],
-      true,
-      clFood
-    );
-
     createObjectGroupsByAreas(fish, 0,
-      new AndConstraint([avoidClasses(clFood, 6), stayClasses(clWater, 2)]),
-      5, 1000, [new Area(placer.place(new NullConstraint()))]
+      avoidClasses(clFood, 6),
+      scaleByMapSize(3, 9), 1000,
+      [new Area(placer.place(stayClasses(clWater, 1)))]
     );
 
-    let mineralPlacer = new AnnulusPlacer(22, 26, position).place(
-      new AndConstraint([avoidClasses(clForest, 10, clHill, 2, clWater, 4)])
+    const mineralPlacer = new AnnulusPlacer(lakeSize + 2, lakeSize + 4, position);
+    const surroundingArea = new Area(mineralPlacer.place(avoidClasses(clWater, 4)));
+
+    createObjectGroupsByAreas(mineralDistribution.pop() ? stone : metal, 0,
+      new NullConstraint(),
+      1, 400, [surroundingArea]
     );
-    let surroundingArea = new Area(mineralPlacer);
-
-    if (mineralDistribution.pop()) {
-      let stone = new SimpleGroup(
-        [new SimpleObject(oStoneLarge, 1, 1, 0, 4, 0, 2 * Math.PI, 4)],
-        true,
-        clRock
-      );
-
-      createObjectGroupsByAreas(stone, 0,
-        new NullConstraint(),
-        1, 400, [surroundingArea]
-      );
-    } else {
-      let metal = new SimpleGroup(
-        [new SimpleObject(oMetalLarge, 1, 1, 0, 4)],
-        true,
-        clRock
-      );
-
-      createObjectGroupsByAreas(metal, 0,
-        avoidClasses(clRock, 6),
-        1, 400, [surroundingArea]
-      );
-    }
   }
 }
 
@@ -237,22 +262,8 @@ createBumps(avoidClasses(clPlayer, 20));
 
 Engine.SetProgress(30);
 
-let placer = new DiskPlacer(4, new Vector2D(mapSize / 2, mapSize / 2)).place(
-  new NullConstraint()
-);
-let centerMineralsArea = new Area(placer);
-
-let stone = new SimpleGroup(
-  [new SimpleObject(oStoneLarge, 1, 1, 0, 4, 0, 2 * Math.PI, 4)],
-  true,
-  clRock
-);
-
-let metal = new SimpleGroup(
-  [new SimpleObject(oMetalLarge, 1, 1, 0, 4)],
-  true,
-  clRock
-);
+const mineralPlacer = new DiskPlacer(4, new Vector2D(mapSize / 2, mapSize / 2));
+const centerMineralsArea = new Area(mineralPlacer.place(new NullConstraint()));
 
 createObjectGroupsByAreas(stone, 0,
   new NullConstraint(),
@@ -263,6 +274,7 @@ createObjectGroupsByAreas(metal, 0,
   avoidClasses(clRock, 6),
   1, 400, [centerMineralsArea]
 );
+
 Engine.SetProgress(32);
 
 if (randBool())
@@ -272,8 +284,8 @@ else
 
 Engine.SetProgress(34);
 
-let constraints = avoidClasses(clHill, 1, clMetal, 4, clRock, 4, clFood, 10);
-let stragglerConstraints = avoidClasses(clHill, 1, clMetal, 4, clRock, 4, clBaseResource, 10, clFood, 10);
+let constraints = avoidClasses(clHill, 1, clMetal, 4, clRock, 4, clFood, 10, clWater, 4);
+let stragglerConstraints = avoidClasses(clHill, 1, clMetal, 4, clRock, 4, clBaseResource, 10, clFood, 10, clWater, 4);
 
 placeBalancedFood(playerPlacements, constraints, stragglerConstraints, 0.5);
 
@@ -282,43 +294,42 @@ Engine.SetProgress(40);
 if (currentBiome() != "generic/savanna") {
   createBalancedPlayerForests(
    playerPositions,
-   avoidClasses(clForest, 18, clHill, 1, clMetal, 4, clRock, 4, clFood, 4),
+   avoidClasses(clForest, 18, clHill, 1, clMetal, 4, clRock, 4, clFood, 4, clWater, 4, clBaseResource, 8),
    clForest);
 }
 
 Engine.SetProgress(44);
 
-const [forestTrees, stragglerTrees] = getTreeCounts(...rBiomeTreeCount(1));
-const leftPlateauArea = new Area(leftPlateauPlacer.place(avoidClasses(clWater, 4)));
-const rightPlateauArea = new Area(rightPlateauPlacer.place(avoidClasses(clWater, 4)));
-const plateauTrees = Math.round(forestTrees / 2);
+const [forestTrees, stragglerTrees] = getTreeCounts(...rBiomeTreeCount(0.7));
+const leftPlateauArea = new Area(leftPlateauPlacer.place(avoidClasses(clWater, 4, clPlayer, 40)));
+const rightPlateauArea = new Area(rightPlateauPlacer.place(avoidClasses(clWater, 4, clPlayer, 40)));
 
 createForestsInArea(
  leftPlateauArea,
- avoidClasses(clForest, 18, clHill, 1, clMetal, 4, clRock, 4, clFood, 4, clWater, 3),
+ avoidClasses(clForest, 16, clHill, 1, clMetal, 4, clRock, 4, clFood, 4, clWater, 3, clPlayer, 40),
  clForest,
- plateauTrees,
+ forestTrees,
  2);
 
 Engine.SetProgress(48);
 
 createForestsInArea(
  rightPlateauArea,
- avoidClasses(clForest, 18, clHill, 1, clMetal, 4, clRock, 4, clFood, 4, clWater, 3),
+ avoidClasses(clForest, 16, clHill, 1, clMetal, 4, clRock, 4, clFood, 4, clWater, 3, clPlayer, 40),
  clForest,
- plateauTrees,
+ forestTrees,
  2);
 
 Engine.SetProgress(52);
 
-const lowlandsPlacer = new RectPlacer(new Vector2D(halfMapSize - lowlandsWidth / 2, 0), new Vector2D(halfMapSize + lowlandsWidth / 2, mapSize));
+const lowlandsPlacer = new RectPlacer(new Vector2D(leftRampStartX, 0), new Vector2D(rightRampStartX, mapSize));
 const lowlandsArea = new Area(lowlandsPlacer.place(avoidClasses(clPlayer, 40)));
 
 createForestsInArea(
  lowlandsArea,
- avoidClasses(clForest, 18, clHill, 1, clMetal, 4, clRock, 4, clFood, 4),
+ avoidClasses(clForest, 14, clHill, 1, clMetal, 4, clRock, 4, clFood, 4, clPlayer, 40),
  clForest,
- plateauTrees / 2,
+ Math.round(forestTrees / 2),
  1,
  2
 );
@@ -329,7 +340,7 @@ createLayeredPatches(
  [scaleByMapSize(3, 6), scaleByMapSize(5, 10), scaleByMapSize(8, 21)],
  [[tMainTerrain,tTier1Terrain],[tTier1Terrain,tTier2Terrain], [tTier2Terrain,tTier3Terrain]],
  [1, 1],
- avoidClasses(clForest, 0, clHill, 0, clDirt, 5, clPlayer, 12),
+ avoidClasses(clForest, 0, clHill, 0, clDirt, 5, clPlayer, 12, clWater, 3),
  scaleByMapSize(15, 45),
  clDirt);
 
@@ -339,7 +350,7 @@ g_Map.log("Creating grass patches");
 createPatches(
  [scaleByMapSize(2, 4), scaleByMapSize(3, 7), scaleByMapSize(5, 15)],
  tTier4Terrain,
- avoidClasses(clForest, 0, clHill, 0, clDirt, 5, clPlayer, 12),
+ avoidClasses(clForest, 0, clHill, 0, clDirt, 5, clPlayer, 12, clWater, 3),
  scaleByMapSize(15, 45),
  clDirt);
 Engine.SetProgress(59);
@@ -387,28 +398,26 @@ createDecoration(
 		planetm * scaleByMapSize(13, 200),
 		planetm * scaleByMapSize(13, 200)
 	],
-	avoidClasses(clForest, 0, clPlayer, 0, clHill, 0));
+	avoidClasses(clForest, 0, clPlayer, 0, clHill, 0, clWater, 0));
 
 Engine.SetProgress(62);
 
-createBadFood(avoidClasses(clForest, 0, clHill, 1, clMetal, 4, clRock, 4, clFood, 20, clWater, 10));
+createBadFood(avoidClasses(clForest, 0, clHill, 1, clMetal, 4, clRock, 4, clFood, 20, clWater, 14));
 
 Engine.SetProgress(67);
-//
-//Engine.SetProgress(75);
-//
-//createFood(
-//  [
-//    [new SimpleObject(oFruitBush, 5, 7, 0, 4)]
-//  ],
-//  [
-//    2 * numPlayers
-//  ],
-//  avoidClasses(clForest, 0, clPlayer, 45, clHill, 1, clMetal, 4, clRock, 4, clFood, 10),
-//  clFood);
-//
-//Engine.SetProgress(85);
-//
+
+createFood(
+  [
+    [new SimpleObject(oFruitBush, 5, 7, 0, 4)]
+  ],
+  [
+    2 * numPlayers
+  ],
+  avoidClasses(clForest, 0, clPlayer, 45, clHill, 1, clMetal, 4, clRock, 4, clFood, 10, clWater, 14),
+  clFood);
+
+Engine.SetProgress(75);
+
 createStragglerTrees(
   [oTree1, oTree2, oTree4, oTree3],
   avoidClasses(
@@ -419,8 +428,8 @@ createStragglerTrees(
   clForest,
   stragglerTrees);
 
-Engine.SetProgress(75);
+Engine.SetProgress(80);
 
-placePlayersNomad(clPlayer, avoidClasses(clForest, 1, clMetal, 4, clRock, 4, clHill, 4, clFood, 2));
+placePlayersNomad(clPlayer, avoidClasses(clForest, 1, clMetal, 4, clRock, 4, clHill, 4, clFood, 2, clWater, 6));
 
 g_Map.ExportMap();
