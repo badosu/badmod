@@ -212,7 +212,6 @@ Engine.SetProgress(50);
 if (currentBiome() != "generic/savanna") {
   createBalancedPlayerForests(
     playerPositions,
-    [tMainTerrain, tForestFloor1, tForestFloor2, pForest1, pForest2],
     avoidClasses(clForest, 18, clHill, 0, clMetal, 4, clRock, 4, clFood, 4, clWater, 4),
     clForest);
 }

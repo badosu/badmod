@@ -1,21 +1,18 @@
-function createBalancedPlayerForests(playerPositions, terrainSet, constraint, tileClass)
+function pickRandomCollection(collection, amount) {
+  let newCollection = [];
+  let dup = collection.slice();
+
+  for (let i = 0; i < amount; ++i) {
+    const index = Math.floor(dup.length * Math.random());
+    const item = dup.splice(index, 1)[0];
+    newCollection.push(item);
+  }
+
+  return newCollection;
+}
+
+function createBalancedPlayerForests(playerPositions, constraint, tileClass)
 {
-  // Construct different forest types from the terrain textures and template names.
-  let [mainTerrain, terrainForestFloor1, terrainForestFloor2, terrainForestTree1, terrainForestTree2] = terrainSet;
-
-  // The painter will pick a random Terrain for each part of the forest.
-  let forestVariants = [
-    {
-      "borderTerrains": [terrainForestFloor2, mainTerrain, terrainForestTree1],
-      "interiorTerrains": [terrainForestFloor2, terrainForestTree1]
-    },
-    {
-      "borderTerrains": [terrainForestFloor1, mainTerrain, terrainForestTree2],
-      "interiorTerrains": [terrainForestFloor1, terrainForestTree2]
-    }
-  ];
-
-  let forestVariant = pickRandom(forestVariants);
   let treeCount = randIntInclusive(20, 30);
   let forestAmount = randIntInclusive(3, 4);
 
@@ -25,15 +22,53 @@ function createBalancedPlayerForests(playerPositions, terrainSet, constraint, ti
 
     let forestArea = new Area(new AnnulusPlacer(29, 41, playerPosition).place(new NullConstraint()));
 
+    createForestsInArea(forestArea, constraint, tileClass, treeCount, 3, Math.floor(scaleByMapSize(3, 5)), 1, forestAmount, 0);
+  }
+}
+/**
+ * Places uniformly sized forests at random locations.
+ * Generates two variants of forests from the given terrain textures and tree templates.
+ * The forest border has less trees than the inside.
+ */
+function createForestsInArea(area, constraint, tileClass, treeCount,
+  minRadius = 1,
+  maxRadius = Math.floor(scaleByMapSize(3, 5)),
+  forestVariantNumber = 2,
+  numberOfForests = Math.floor(treeCount / (scaleByMapSize(3, 6) * getNumPlayers() * forestVariantNumber)),
+  failurePercentage = 0.5,
+  retryFactor = 400)
+{
+  if (!treeCount)
+    return;
+
+  const terrainSet = [tMainTerrain, tForestFloor1, tForestFloor2, pForest1, pForest2];
+
+  // Construct different forest types from the terrain textures and template names.
+  const [mainTerrain, terrainForestFloor1, terrainForestFloor2, terrainForestTree1, terrainForestTree2] = terrainSet;
+
+  // The painter will pick a random Terrain for each part of the forest.
+  let forestVariants = pickRandomCollection([
+    {
+      "borderTerrains": [terrainForestFloor2, mainTerrain, terrainForestTree1],
+      "interiorTerrains": [terrainForestFloor2, terrainForestTree1]
+    },
+    {
+      "borderTerrains": [terrainForestFloor1, mainTerrain, terrainForestTree2],
+      "interiorTerrains": [terrainForestFloor1, terrainForestTree2]
+    }
+  ], forestVariantNumber);
+
+  g_Map.log("Creating forests");
+  for (let forestVariant of forestVariants) {
     createAreasInAreas(
-      new ChainPlacer(1, 3, treeCount, 0),
+      new ChainPlacer(minRadius, maxRadius, treeCount / numberOfForests, failurePercentage),
       [
         new LayeredPainter([forestVariant.borderTerrains, forestVariant.interiorTerrains], [2]),
         new TileClassPainter(tileClass)
       ],
       constraint,
-      forestAmount,
-      400,
-      [forestArea]);
+      numberOfForests,
+      retryFactor,
+      [area]);
   }
 }
