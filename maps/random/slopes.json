@@ -3,7 +3,7 @@
 		"Name" : "Slopes",
 		"Script" : "slopes.js",
 		"Description" : "A typical map without any water. Resources are distributed evenly between players.",
-		"Preview" : "mainland_temperate.png",
+		"Preview" : "slopes.png",
 		"SupportedBiomes": "generic/",
 		"CircularMap" : false
 	}

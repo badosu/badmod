@@ -1,9 +1,10 @@
 Engine.LoadLibrary("rmgen");
 Engine.LoadLibrary("rmgen-common");
 Engine.LoadLibrary("rmbiome");
-Engine.LoadLibrary("balancedHelpers");
 
 setSelectedBiome();
+
+Engine.LoadLibrary("balancedHelpers");
 
 const tMainTerrain = g_Terrains.mainTerrain;
 const tForestFloor1 = g_Terrains.forestFloor1;
@@ -101,31 +102,31 @@ if (secondPlayerGroupSize == 1) {
 const playerPlacements = [playerIDs, playerPositions];
 
 placePlayerBases({
-	"PlayerPlacement": playerPlacements,
-	"PlayerTileClass": clPlayer,
-	"BaseResourceClass": clBaseResource,
-	"CityPatch": {
-		"outerTerrain": tRoadWild,
-		"innerTerrain": tRoad
-	},
-	"Chicken": {
-	},
-	"Berries": {
-		"template": oFruitBush
-	},
-	"Mines": {
-		"types": [
-			{ "template": oMetalLarge },
-			{ "template": oStoneLarge }
-		]
-	},
-	"Trees": {
-		"template": oTree1,
-		"count": 5
-	},
-	"Decoratives": {
-		"template": aGrassShort
-	}
+  "PlayerPlacement": playerPlacements,
+  "PlayerTileClass": clPlayer,
+  "BaseResourceClass": clBaseResource,
+  "CityPatch": {
+    "outerTerrain": tRoadWild,
+    "innerTerrain": tRoad
+  },
+  "Chicken": {
+  },
+  "Berries": {
+    "template": oFruitBush
+  },
+  "Mines": {
+    "types": [
+      { "template": oMetalLarge },
+      { "template": oStoneLarge }
+    ]
+  },
+  "Trees": {
+    "template": oTree1,
+    "count": 5
+  },
+  "Decoratives": {
+    "template": aGrassShort
+  }
 });
 
 Engine.SetProgress(10);
@@ -219,13 +220,16 @@ function createSideLakes(xDistance, yDistance) {
       [new Area(placer.place(stayClasses(clWater, 1)))]
     );
 
-    const mineralPlacer = new AnnulusPlacer(lakeSize + 2, lakeSize + 4, position);
-    const surroundingArea = new Area(mineralPlacer.place(avoidClasses(clWater, 4)));
+    const lowerRadius = lakeSize + 2;
+    const maxRadius = lakeSize + 4;
 
     createObjectGroupsByAreas(mineralDistribution.pop() ? stone : metal, 0,
-      new NullConstraint(),
-      1, 400, [surroundingArea]
+      avoidClasses(clWater, 4),
+      1, 400, [getAnnulusArea(lowerRadius, maxRadius, position)]
     );
+
+    placeFoodAmount(oMainHuntableAnimal, 4, 4, position, avoidClasses(clWater, 2, clFood, 20, clRock, 4, clMetal, 4), lowerRadius, maxRadius);
+    placeFoodAmount(oMainHuntableAnimal, 4, 4, position, avoidClasses(clWater, 2, clFood, 20, clRock, 4, clMetal, 4), lowerRadius, maxRadius);
   }
 }
 
@@ -293,9 +297,9 @@ Engine.SetProgress(40);
 
 if (currentBiome() != "generic/savanna") {
   createBalancedPlayerForests(
-   playerPositions,
-   avoidClasses(clForest, 18, clHill, 1, clMetal, 4, clRock, 4, clFood, 4, clWater, 4, clBaseResource, 8),
-   clForest);
+    playerPositions,
+    avoidClasses(clForest, 18, clHill, 1, clMetal, 4, clRock, 4, clFood, 4, clWater, 4, clBaseResource, 8),
+    clForest);
 }
 
 Engine.SetProgress(44);
@@ -305,20 +309,20 @@ const leftPlateauArea = new Area(leftPlateauPlacer.place(avoidClasses(clWater, 4
 const rightPlateauArea = new Area(rightPlateauPlacer.place(avoidClasses(clWater, 4, clPlayer, 40)));
 
 createForestsInArea(
- leftPlateauArea,
- avoidClasses(clForest, 16, clHill, 1, clMetal, 4, clRock, 4, clFood, 4, clWater, 3, clPlayer, 40),
- clForest,
- forestTrees,
- 2);
+  leftPlateauArea,
+  avoidClasses(clForest, 16, clHill, 1, clMetal, 4, clRock, 4, clFood, 4, clWater, 3, clPlayer, 40),
+  clForest,
+  forestTrees,
+  2);
 
 Engine.SetProgress(48);
 
 createForestsInArea(
- rightPlateauArea,
- avoidClasses(clForest, 16, clHill, 1, clMetal, 4, clRock, 4, clFood, 4, clWater, 3, clPlayer, 40),
- clForest,
- forestTrees,
- 2);
+  rightPlateauArea,
+  avoidClasses(clForest, 16, clHill, 1, clMetal, 4, clRock, 4, clFood, 4, clWater, 3, clPlayer, 40),
+  clForest,
+  forestTrees,
+  2);
 
 Engine.SetProgress(52);
 
@@ -326,85 +330,85 @@ const lowlandsPlacer = new RectPlacer(new Vector2D(leftRampStartX, 0), new Vecto
 const lowlandsArea = new Area(lowlandsPlacer.place(avoidClasses(clPlayer, 40)));
 
 createForestsInArea(
- lowlandsArea,
- avoidClasses(clForest, 14, clHill, 1, clMetal, 4, clRock, 4, clFood, 4, clPlayer, 40),
- clForest,
- Math.round(forestTrees / 2),
- 1,
- 2
+  lowlandsArea,
+  avoidClasses(clForest, 14, clHill, 1, clMetal, 4, clRock, 4, clFood, 4, clPlayer, 40),
+  clForest,
+  Math.round(forestTrees / 2),
+  1,
+  2
 );
 Engine.SetProgress(55);
 
 g_Map.log("Creating dirt patches");
 createLayeredPatches(
- [scaleByMapSize(3, 6), scaleByMapSize(5, 10), scaleByMapSize(8, 21)],
- [[tMainTerrain,tTier1Terrain],[tTier1Terrain,tTier2Terrain], [tTier2Terrain,tTier3Terrain]],
- [1, 1],
- avoidClasses(clForest, 0, clHill, 0, clDirt, 5, clPlayer, 12, clWater, 3),
- scaleByMapSize(15, 45),
- clDirt);
+  [scaleByMapSize(3, 6), scaleByMapSize(5, 10), scaleByMapSize(8, 21)],
+  [[tMainTerrain,tTier1Terrain],[tTier1Terrain,tTier2Terrain], [tTier2Terrain,tTier3Terrain]],
+  [1, 1],
+  avoidClasses(clForest, 0, clHill, 0, clDirt, 5, clPlayer, 12, clWater, 3),
+  scaleByMapSize(15, 45),
+  clDirt);
 
 Engine.SetProgress(57);
 
 g_Map.log("Creating grass patches");
 createPatches(
- [scaleByMapSize(2, 4), scaleByMapSize(3, 7), scaleByMapSize(5, 15)],
- tTier4Terrain,
- avoidClasses(clForest, 0, clHill, 0, clDirt, 5, clPlayer, 12, clWater, 3, clRamp, 0),
- scaleByMapSize(15, 45),
- clDirt);
+  [scaleByMapSize(2, 4), scaleByMapSize(3, 7), scaleByMapSize(5, 15)],
+  tTier4Terrain,
+  avoidClasses(clForest, 0, clHill, 0, clDirt, 5, clPlayer, 12, clWater, 3, clRamp, 0),
+  scaleByMapSize(15, 45),
+  clDirt);
 Engine.SetProgress(59);
-//
-//g_Map.log("Creating stone mines");
-//createMines(
-//	[
-//		[new SimpleObject(oStoneLarge, 1, 1, 0, 4, 0, 2 * Math.PI, 4)]
-//	],
-//	avoidClasses(clForest, 1, clPlayer, 60, clRock, 22, clHill, 1),
-//	clRock,
-//  scaleByMapSize(4, 16) - 1
-//);
-//Engine.SetProgress(60);
-//
-//g_Map.log("Creating metal mines");
-//createMines(
-// [
-//  [new SimpleObject(oMetalLarge, 1, 1, 0, 4)]
-// ],
-// avoidClasses(clForest, 1, clPlayer, 60, clMetal, 22, clRock, 5, clHill, 1),
-// clMetal,
-// scaleByMapSize(4, 16) - 1
-//);
-//
-//Engine.SetProgress(65);
-//
+
+g_Map.log("Creating stone mines");
+createMines(
+  [
+    [new SimpleObject(oStoneLarge, 1, 1, 0, 4, 0, 2 * Math.PI, 4)]
+  ],
+  avoidClasses(clForest, 1, clPlayer, 60, clRock, 22, clHill, 1, clWater, 30),
+  clRock,
+  scaleByMapSize(4, 16) - 2
+);
+Engine.SetProgress(62);
+
+g_Map.log("Creating metal mines");
+createMines(
+  [
+    [new SimpleObject(oMetalLarge, 1, 1, 0, 4)]
+  ],
+  avoidClasses(clForest, 1, clPlayer, 60, clMetal, 22, clRock, 5, clHill, 1, clWater, 30),
+  clMetal,
+  scaleByMapSize(4, 16) - 2
+);
+
+Engine.SetProgress(65);
+
 var planetm = 1;
 
 if (currentBiome() == "generic/tropic")
-	planetm = 8;
+  planetm = 8;
 
 createDecoration(
-	[
-		[new SimpleObject(aRockMedium, 1, 3, 0, 1)],
-		[new SimpleObject(aRockLarge, 1, 2, 0, 1), new SimpleObject(aRockMedium, 1, 3, 0, 2)],
-		[new SimpleObject(aGrassShort, 1, 2, 0, 1)],
-		[new SimpleObject(aGrass, 2, 4, 0, 1.8), new SimpleObject(aGrassShort, 3,6, 1.2, 2.5)],
-		[new SimpleObject(aBushMedium, 1, 2, 0, 2), new SimpleObject(aBushSmall, 2, 4, 0, 2)]
-	],
-	[
-		scaleByMapSize(16, 262),
-		scaleByMapSize(8, 131),
-		planetm * scaleByMapSize(13, 200),
-		planetm * scaleByMapSize(13, 200),
-		planetm * scaleByMapSize(13, 200)
-	],
-	avoidClasses(clForest, 0, clPlayer, 0, clHill, 0, clWater, 0));
+  [
+    [new SimpleObject(aRockMedium, 1, 3, 0, 1)],
+    [new SimpleObject(aRockLarge, 1, 2, 0, 1), new SimpleObject(aRockMedium, 1, 3, 0, 2)],
+    [new SimpleObject(aGrassShort, 1, 2, 0, 1)],
+    [new SimpleObject(aGrass, 2, 4, 0, 1.8), new SimpleObject(aGrassShort, 3,6, 1.2, 2.5)],
+    [new SimpleObject(aBushMedium, 1, 2, 0, 2), new SimpleObject(aBushSmall, 2, 4, 0, 2)]
+  ],
+  [
+    scaleByMapSize(16, 262),
+    scaleByMapSize(8, 131),
+    planetm * scaleByMapSize(13, 200),
+    planetm * scaleByMapSize(13, 200),
+    planetm * scaleByMapSize(13, 200)
+  ],
+  avoidClasses(clForest, 0, clPlayer, 0, clHill, 0, clWater, 0));
 
-Engine.SetProgress(62);
+Engine.SetProgress(70);
 
-createBadFood(avoidClasses(clForest, 0, clHill, 1, clMetal, 4, clRock, 4, clFood, 20, clWater, 14));
+createBadFood(avoidClasses(clForest, 0, clHill, 1, clMetal, 4, clRock, 4, clFood, 20, clWater, 20));
 
-Engine.SetProgress(67);
+Engine.SetProgress(75);
 
 createFood(
   [
@@ -416,7 +420,7 @@ createFood(
   avoidClasses(clForest, 0, clPlayer, 45, clHill, 1, clMetal, 4, clRock, 4, clFood, 10, clWater, 14),
   clFood);
 
-Engine.SetProgress(75);
+Engine.SetProgress(80);
 
 createStragglerTrees(
   [oTree1, oTree2, oTree4, oTree3],
@@ -428,7 +432,7 @@ createStragglerTrees(
   clForest,
   stragglerTrees);
 
-Engine.SetProgress(80);
+Engine.SetProgress(85);
 
 placePlayersNomad(clPlayer, avoidClasses(clForest, 1, clMetal, 4, clRock, 4, clHill, 4, clFood, 2, clWater, 6));
 

@@ -1,8 +1,3 @@
-- Fix berries on top of hills on balanced hyrcanian shores
-- For hunt on top of hill for wrench tg
-- Balanced mainland no secondary metal
-- Balanced mainland no first hunt when hills present
+- Conjoined berries
+- Gazelles on top of hill for wrench tg
 - Include fig/apple trees in generator
-- mineral gen 0-2 1v1, 0-3 tg
-- 8 players tiny fix wrench/cross
-- 8 players wrench small

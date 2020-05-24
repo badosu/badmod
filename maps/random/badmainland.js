@@ -55,6 +55,7 @@ var clFood = g_Map.createTileClass();
 var clBaseResource = g_Map.createTileClass();
 
 const playerPlacements = playerPlacementCircle(fractionToTiles(0.30));
+const [playerIDs, playerPositions] = playerPlacements;
 
 placePlayerBases({
 	"PlayerPlacement": playerPlacements,
