@@ -58,6 +58,7 @@ var clDirt = g_Map.createTileClass();
 var clRock = g_Map.createTileClass();
 var clMetal = g_Map.createTileClass();
 var clFood = g_Map.createTileClass();
+var clFish = g_Map.createTileClass();
 var clBaseResource = g_Map.createTileClass();
 var clRamp = g_Map.createTileClass();
 var clWater = g_Map.createTileClass();
@@ -175,7 +176,7 @@ Engine.SetProgress(18);
 
 const heightWaterLevel = heightTop - 7;
 
-const fish = new SimpleGroup([new SimpleObject(oFish, 2, 2, 0, 2)], true, clFood);
+const fish = new SimpleGroup([new SimpleObject(oFish, 2, 2, 0, 2)], true, clFish);
 const stone = new SimpleGroup(
   [new SimpleObject(oStoneLarge, 1, 1, 0, 4, 0, 2 * Math.PI, 4)],
   true,
@@ -215,7 +216,7 @@ function createSideLakes(xDistance, yDistance) {
     );
 
     createObjectGroupsByAreas(fish, 0,
-      avoidClasses(clFood, 6),
+      avoidClasses(clFish, 6),
       scaleByMapSize(3, 9), 1000,
       [new Area(placer.place(stayClasses(clWater, 1)))]
     );
@@ -228,8 +229,8 @@ function createSideLakes(xDistance, yDistance) {
       1, 400, [getAnnulusArea(lowerRadius, maxRadius, position)]
     );
 
-    placeFoodAmount(oMainHuntableAnimal, 4, 4, position, avoidClasses(clWater, 2, clFood, 20, clRock, 4, clMetal, 4), lowerRadius, maxRadius);
-    placeFoodAmount(oMainHuntableAnimal, 4, 4, position, avoidClasses(clWater, 2, clFood, 20, clRock, 4, clMetal, 4), lowerRadius, maxRadius);
+    placeFoodAmount(oMainHuntableAnimal, 4, 4, position, avoidClasses(clWater, 2, clFood, 25, clRock, 4, clMetal, 4), lowerRadius, maxRadius);
+    placeFoodAmount(oMainHuntableAnimal, 4, 4, position, avoidClasses(clWater, 2, clFood, 25, clRock, 4, clMetal, 4), lowerRadius, maxRadius);
   }
 }
 
