@@ -2,7 +2,7 @@
 	"settings" : {
 		"Name" : "Slopes",
 		"Script" : "slopes.js",
-		"Description" : "A typical map without any water. Resources are distributed evenly between players.",
+		"Description" : "Teams are placed in opposite sides, surrounded by plateaus with plenty of wood and fish from lakes.",
 		"Preview" : "slopes.png",
 		"SupportedBiomes": "generic/",
 		"CircularMap" : false

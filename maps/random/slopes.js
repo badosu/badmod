@@ -311,7 +311,7 @@ const rightPlateauArea = new Area(rightPlateauPlacer.place(avoidClasses(clWater,
 
 createForestsInArea(
   leftPlateauArea,
-  avoidClasses(clForest, 16, clHill, 1, clMetal, 4, clRock, 4, clFood, 4, clWater, 3, clPlayer, 40),
+  avoidClasses(clForest, 13, clHill, 1, clMetal, 4, clRock, 4, clFood, 4, clWater, 3, clPlayer, 40),
   clForest,
   forestTrees,
   2);
@@ -320,7 +320,7 @@ Engine.SetProgress(48);
 
 createForestsInArea(
   rightPlateauArea,
-  avoidClasses(clForest, 16, clHill, 1, clMetal, 4, clRock, 4, clFood, 4, clWater, 3, clPlayer, 40),
+  avoidClasses(clForest, 13, clHill, 1, clMetal, 4, clRock, 4, clFood, 4, clWater, 3, clPlayer, 40),
   clForest,
   forestTrees,
   2);
