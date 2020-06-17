@@ -54,7 +54,7 @@ var clMetal = g_Map.createTileClass();
 var clFood = g_Map.createTileClass();
 var clBaseResource = g_Map.createTileClass();
 
-const playerPlacements = playerPlacementCircle(fractionToTiles(0.30));
+const playerPlacements = playerPlacementCircle(fractionToTiles(0.33));
 const [playerIDs, playerPositions] = playerPlacements;
 
 placePlayerBases({
@@ -91,18 +91,16 @@ createBumps(avoidClasses(clPlayer, 20));
 
 Engine.SetProgress(25);
 
-if (randBool())
-  createHills([tCliff, tCliff, tHill], avoidClasses(clPlayer, 35, clHill, 15), clHill, scaleByMapSize(2, 11));
-else
-  createMountains(tCliff, avoidClasses(clPlayer, 35, clHill, 15), clHill, scaleByMapSize(2, 11));
-
-let constraints = avoidClasses(clHill, 1, clMetal, 4, clRock, 4, clFood, 10);
-let stragglerConstraints = avoidClasses(clHill, 1, clMetal, 4, clRock, 4, clBaseResource, 10, clFood, 10);
-
 placeBalancedMinerals(playerPositions);
-placeBalancedFood(playerPlacements, constraints, stragglerConstraints);
 
-Engine.SetProgress(40);
+Engine.SetProgress(30);
+
+placeBalancedFood(playerPlacements,
+  avoidClasses(clHill, 1, clMetal, 4, clRock, 4, clFood, 10),
+  avoidClasses(clHill, 1, clMetal, 4, clRock, 4, clBaseResource, 10, clFood, 10)
+);
+
+Engine.SetProgress(35);
 
 if (currentBiome() != "generic/savanna") {
   createBalancedPlayerForests(
@@ -110,6 +108,15 @@ if (currentBiome() != "generic/savanna") {
    avoidClasses(clForest, 18, clHill, 1, clMetal, 4, clRock, 4, clFood, 4),
    clForest);
 }
+
+Engine.SetProgress(40);
+
+if (randBool())
+  createHills([tCliff, tCliff, tHill], avoidClasses(clPlayer, 35, clHill, 15, clForest, 6, clMetal, 6, clRock, 6, clFood, 6), clHill, scaleByMapSize(2, 11));
+else
+  createMountains(tCliff, avoidClasses(clPlayer, 35, clHill, 15, clForest, 6, clMetal, 6, clRock, 6, clFood, 6), clHill, scaleByMapSize(2, 11));
+
+Engine.SetProgress(45);
 
 var [forestTrees, stragglerTrees] = getTreeCounts(...rBiomeTreeCount(1));
 createForests(
@@ -136,6 +143,7 @@ createPatches(
  avoidClasses(clForest, 0, clHill, 0, clDirt, 5, clPlayer, 12),
  scaleByMapSize(15, 45),
  clDirt);
+
 Engine.SetProgress(55);
 
 g_Map.log("Creating stone mines");
@@ -210,6 +218,8 @@ createStragglerTrees(
   ),
   clForest,
   stragglerTrees);
+
+Engine.SetProgress(90);
 
 placePlayersNomad(clPlayer, avoidClasses(clForest, 1, clMetal, 4, clRock, 4, clHill, 4, clFood, 2));
 

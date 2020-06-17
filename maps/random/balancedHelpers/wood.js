@@ -13,14 +13,14 @@ function pickRandomCollection(collection, amount) {
 
 function createBalancedPlayerForests(playerPositions, constraint, tileClass)
 {
-  let treeCount = randIntInclusive(20, 30);
+  let treeCount = randIntInclusive(25, 35);
   let forestAmount = randIntInclusive(3, 4);
 
   for (let i = 0; i < playerPositions.length; ++i)
   {
     const playerPosition = playerPositions[i];
 
-    let forestArea = new Area(new AnnulusPlacer(29, 41, playerPosition).place(new NullConstraint()));
+    let forestArea = new Area(new AnnulusPlacer(27, 38, playerPosition).place(new NullConstraint()));
 
     createForestsInArea(forestArea, constraint, tileClass, treeCount, 3, Math.floor(scaleByMapSize(3, 5)), 1, forestAmount, 0);
   }

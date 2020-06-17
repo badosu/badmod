@@ -17,4 +17,3 @@ const foodValues = {
   'gaia/flora_bush_grapes': 100, // mediterranean random occurrence
   'gaia/flora_bush_berry_desert': 100, // desert
 };
-
