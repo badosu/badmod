@@ -54,7 +54,26 @@ var clMetal = g_Map.createTileClass();
 var clFood = g_Map.createTileClass();
 var clBaseResource = g_Map.createTileClass();
 
-var playerPlacements = playerPlacementCircle(fractionToTiles(0.30));
+let playerDistanceFraction;
+
+switch(g_Map.getSize()) {
+  case 128: // tiny
+    playerDistanceFraction = 0.32;
+    break;
+  case 192: // small
+    playerDistanceFraction = 0.31;
+    break;
+  case 256: // medium
+    playerDistanceFraction = 0.28;
+    break;
+  case 320: // normal
+    playerDistanceFraction = 0.27;
+    break;
+  default:
+    playerDistanceFraction = 0.26;
+}
+
+const playerPlacements = playerPlacementCircle(fractionToTiles(playerDistanceFraction + numPlayers * 0.007));
 let [playersOrder, playerPositions, playerAngles] = playerPlacements;
 
 let playerIDs = [];
