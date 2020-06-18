@@ -46,60 +46,26 @@ const pForest2 = [tForestFloor1 + TERRAIN_SEPARATOR + oTree4, tForestFloor1 + TE
 const heightLand = 0;
 
 var g_Map = new RandomMap(heightLand, tMainTerrain);
+const center = g_Map.getCenter();
 const mapSize = g_Map.getSize();
 const halfMapSize = g_Map.getSize() / 2;
 
 const numPlayers = getNumPlayers();
 
-var clPlayer = g_Map.createTileClass();
-var clHill = g_Map.createTileClass();
-var clForest = g_Map.createTileClass();
-var clDirt = g_Map.createTileClass();
-var clRock = g_Map.createTileClass();
-var clMetal = g_Map.createTileClass();
-var clFood = g_Map.createTileClass();
-var clFish = g_Map.createTileClass();
-var clBaseResource = g_Map.createTileClass();
-var clRamp = g_Map.createTileClass();
-var clWater = g_Map.createTileClass();
+const clPlayer = g_Map.createTileClass();
+const clHill = g_Map.createTileClass();
+const clForest = g_Map.createTileClass();
+const clDirt = g_Map.createTileClass();
+const clRock = g_Map.createTileClass();
+const clMetal = g_Map.createTileClass();
+const clFood = g_Map.createTileClass();
+const clFish = g_Map.createTileClass();
+const clBaseResource = g_Map.createTileClass();
+const clRamp = g_Map.createTileClass();
+const clWater = g_Map.createTileClass();
 
-const playerDistance = fractionToTiles(0.6);
-const playerEdgeDistance = Math.round((mapSize - playerDistance) / 2);
-
-const firstPlayerGroupSize = Math.floor(numPlayers / 2);
-const secondPlayerGroupSize = numPlayers - firstPlayerGroupSize;
-const playerIDs = sortAllPlayers();
-
-let playerPositions = [];
-
-if (firstPlayerGroupSize == 1) {
-  playerPositions.push(new Vector2D(halfMapSize, playerEdgeDistance))
-} else if (firstPlayerGroupSize > 1) {
-  const offset = (firstPlayerGroupSize - 2) * 6;
-  const startAngle = Math.min(firstPlayerGroupSize - 2, 1) * Math.PI / Math.pow(2, firstPlayerGroupSize - 2);
-
-  playerPositions = playerPositions.concat(distributePointsOnCircle(
-    firstPlayerGroupSize,
-    startAngle,
-    20 + firstPlayerGroupSize * 5,
-    new Vector2D(halfMapSize, playerEdgeDistance + offset)
-  )[0]);
-}
-
-if (secondPlayerGroupSize == 1) {
-  playerPositions.push(new Vector2D(halfMapSize, playerEdgeDistance + playerDistance));
-} else if (secondPlayerGroupSize > 1) {
-  const offset = (secondPlayerGroupSize - 2) * 6;
-  const startAngle = Math.min(secondPlayerGroupSize - 2, 1) * Math.PI / Math.pow(2, secondPlayerGroupSize - 2);
-
-  playerPositions = playerPositions.concat(distributePointsOnCircle(
-    secondPlayerGroupSize,
-    -startAngle,
-    20 + secondPlayerGroupSize * 5,
-    new Vector2D(halfMapSize, playerEdgeDistance + playerDistance - offset)
-  )[0]);
-}
-
+const playerDistance = fractionToTiles(0.27);
+const [playerIDs, playerPositions] = placeOpposingTeams(playerDistance, Math.PI / 2, center);
 const playerPlacements = [playerIDs, playerPositions];
 
 placePlayerBases({
@@ -225,12 +191,12 @@ function createSideLakes(xDistance, yDistance) {
     const maxRadius = lakeSize + 4;
 
     createObjectGroupsByAreas(mineralDistribution.pop() ? stone : metal, 0,
-      avoidClasses(clWater, 4),
+      avoidClasses(clWater, 4, clPlayer, 50),
       1, 400, [getAnnulusArea(lowerRadius, maxRadius, position)]
     );
 
-    placeFoodAmount(oMainHuntableAnimal, 4, 4, position, avoidClasses(clWater, 2, clFood, 25, clRock, 4, clMetal, 4), lowerRadius, maxRadius);
-    placeFoodAmount(oMainHuntableAnimal, 4, 4, position, avoidClasses(clWater, 2, clFood, 25, clRock, 4, clMetal, 4), lowerRadius, maxRadius);
+    placeFoodAmount(oMainHuntableAnimal, 4, 4, position, avoidClasses(clWater, 2, clFood, 25, clRock, 4, clMetal, 4, clPlayer, 50), lowerRadius, maxRadius);
+    placeFoodAmount(oMainHuntableAnimal, 4, 4, position, avoidClasses(clWater, 2, clFood, 25, clRock, 4, clMetal, 4, clPlayer, 50), lowerRadius, maxRadius);
   }
 }
 
@@ -267,7 +233,7 @@ createBumps(avoidClasses(clPlayer, 20));
 
 Engine.SetProgress(30);
 
-const mineralPlacer = new DiskPlacer(4, new Vector2D(mapSize / 2, mapSize / 2));
+const mineralPlacer = new DiskPlacer(4, center);
 const centerMineralsArea = new Area(mineralPlacer.place(new NullConstraint()));
 
 createObjectGroupsByAreas(stone, 0,
@@ -332,10 +298,10 @@ const lowlandsArea = new Area(lowlandsPlacer.place(avoidClasses(clPlayer, 40)));
 
 createForestsInArea(
   lowlandsArea,
-  avoidClasses(clForest, 14, clHill, 1, clMetal, 4, clRock, 4, clFood, 4, clPlayer, 40),
+  avoidClasses(clForest, 14, clHill, 1, clMetal, 4, clRock, 4, clFood, 4, clPlayer, 38),
   clForest,
-  Math.round(forestTrees / 2),
-  1,
+  Math.round(forestTrees),
+  2,
   2
 );
 Engine.SetProgress(55);
@@ -431,7 +397,7 @@ createStragglerTrees(
     clMetal, 6, clRock, 6, clFood, 1, clWater, 4
   ),
   clForest,
-  stragglerTrees);
+  (currentBiome() == "generic/savanna") ? stragglerTrees * 1.5 : stragglerTrees);
 
 Engine.SetProgress(85);
 

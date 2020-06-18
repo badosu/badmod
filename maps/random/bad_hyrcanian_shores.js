@@ -71,8 +71,8 @@ var waterPosition = fractionToTiles(0.25)
 var highlandsPosition = fractionToTiles(0.75);
 
 var startAngle = randomAngle();
-const playerPositions = playerPlacementLine(startAngle, mapCenter, fractionToTiles(0.2));
-const playerPlacements = [sortAllPlayers(), playerPositions];
+const playerPlacements = placeOpposingTeams(fractionToTiles(0.2), -startAngle, mapCenter)
+const [playerIDs, playerPositions] = playerPlacements;
 
 placePlayerBases({
 	"PlayerPlacement": playerPlacements,
@@ -103,13 +103,10 @@ placePlayerBases({
 });
 Engine.SetProgress(10);
 
-const actualCenter = numPlayers === 2 ? Vector2D.add(playerPositions[0], playerPositions[1]).mult(0.5).round() : mapCenter;
-const actualAngle = numPlayers === 2 ? actualCenter.angleTo(playerPositions[0]) + Math.PI / 2 : startAngle;
-
 paintRiver({
 	"parallel": true,
-	"start": new Vector2D(mapBounds.left, mapBounds.top).rotateAround(actualAngle, actualCenter),
-	"end": new Vector2D(mapBounds.right, mapBounds.top).rotateAround(actualAngle, actualCenter),
+	"start": new Vector2D(mapBounds.left, mapBounds.top).rotateAround(startAngle, mapCenter),
+	"end": new Vector2D(mapBounds.right, mapBounds.top).rotateAround(startAngle, mapCenter),
 	"width": (numPlayers === 2 ? 2.5 : 2) * waterPosition,
 	"fadeDist": scaleByMapSize(6, 25),
 	"deviation": 0,
@@ -133,17 +130,22 @@ for (let i = 0; i < numPlayers; ++i)
     0,
     stayClasses(clWater, 3),
     1, 400,
-    [new Area(new ODiskPlacer(3, Vector2D.add(playerPositions[i], new Vector2D(65).rotate(actualAngle - Math.PI / 2))).place())]
+    [new Area(new ODiskPlacer(3, Vector2D.add(playerPositions[i], new Vector2D(scaleByMapSize(46, 90)).rotate(startAngle - Math.PI / 2))).place())]
   );
+  Engine.SetProgress(20 + i);
 }
 
 const mineralConstraints = avoidClasses(clWater, 3);
 placeBalancedMinerals(playerPositions, mineralConstraints);
 
+Engine.SetProgress(30);
+
 const constraints = avoidClasses(clHill, 1, clMetal, 4, clRock, 4, clFood, 10);
 const stragglerConstraints = avoidClasses(clHill, 1, clMetal, 4, clRock, 4, clBaseResource, 10, clFood, 10);
 const foodMultiplier = 0.8;
 placeBalancedFood(playerPlacements, constraints, stragglerConstraints, foodMultiplier);
+
+Engine.SetProgress(40);
 
 g_Map.log("Marking highlands area");
 createArea(
@@ -153,19 +155,21 @@ createArea(
 			new Vector2D(mapBounds.right, mapBounds.top - highlandsPosition),
 			new Vector2D(mapBounds.left, mapBounds.bottom),
 			new Vector2D(mapBounds.right, mapBounds.bottom)
-		].map(pos => pos.rotateAround(actualAngle, mapCenter)),
+		].map(pos => pos.rotateAround(startAngle, mapCenter)),
 		Infinity),
 	new TileClassPainter(clHighlands));
 
+Engine.SetProgress(43);
+
 g_Map.log("Creating fish");
-for (let i = 0; i < scaleByMapSize(40, 80); ++i)
+for (let i = 0; i < scaleByMapSize(50, 80); ++i)
 	createObjectGroupsDeprecated(
 		new SimpleGroup([new SimpleObject(oFish, 2, 3, 0, 2)], true, clFood),
 		0,
 		[stayClasses(clWater, 8), avoidClasses(clFood, 10)],
 		numPlayers,
 		50);
-Engine.SetProgress(25);
+Engine.SetProgress(46);
 
 g_Map.log("Creating bumps");
 createAreas(
@@ -174,7 +178,7 @@ createAreas(
 	stayClasses(clHighlands, 1),
 	scaleByMapSize(300, 600));
 
-Engine.SetProgress(30);
+Engine.SetProgress(49);
 
 g_Map.log("Creating hills");
 createAreas(
@@ -187,7 +191,7 @@ createAreas(
 	avoidClasses(clPlayer, 20, clWater, 5, clHill, 15, clHighlands, 5, clRock, 6, clMetal, 6, clFood, 2),
 	scaleByMapSize(1, 4) * numPlayers);
 
-Engine.SetProgress(35);
+Engine.SetProgress(52);
 
 g_Map.log("Creating mainland forests");
 var [forestTrees, stragglerTrees] = getTreeCounts(500, 2500, 0.7);
@@ -205,7 +209,7 @@ for (let type of types)
 		],
 		avoidClasses(clPlayer, 20, clWater, 3, clForest, 10, clHill, 0, clBaseResource, 3, clRock, 2, clMetal, 2),
 		num);
-Engine.SetProgress(45);
+Engine.SetProgress(55);
 
 g_Map.log("Creating highland forests");
 var types = [
@@ -222,7 +226,7 @@ for (let type of types)
 		],
 		avoidClasses(clPlayer, 20, clWater, 3, clForest, 2, clHill, 0, clMetal, 2, clRock, 2),
 		num);
-Engine.SetProgress(70);
+Engine.SetProgress(60);
 
 g_Map.log("Creating dirt patches");
 for (let size of [scaleByMapSize(3, 48), scaleByMapSize(5, 84), scaleByMapSize(8, 128)])
@@ -234,7 +238,7 @@ for (let size of [scaleByMapSize(3, 48), scaleByMapSize(5, 84), scaleByMapSize(8
 		],
 		avoidClasses(clWater, 1, clForest, 0, clHill, 0, clDirt, 5, clPlayer, 4),
 		scaleByMapSize(15, 45));
-Engine.SetProgress(75);
+Engine.SetProgress(63);
 
 g_Map.log("Creating grass patches");
 for (let size of [scaleByMapSize(2, 32), scaleByMapSize(3, 48), scaleByMapSize(5, 80)])
@@ -244,7 +248,7 @@ for (let size of [scaleByMapSize(2, 32), scaleByMapSize(3, 48), scaleByMapSize(5
 		avoidClasses(clWater, 1, clForest, 0, clHill, 0, clDirt, 5, clPlayer, 6, clBaseResource, 6),
 		scaleByMapSize(15, 45));
 
-Engine.SetProgress(80);
+Engine.SetProgress(66);
 
 var group;
 g_Map.log("Creating stone mines");
@@ -254,12 +258,16 @@ createObjectGroupsDeprecated(group, 0,
 	scaleByMapSize(4,16), 100
 );
 
+Engine.SetProgress(69);
+
 g_Map.log("Creating small stone quarries");
 group = new SimpleGroup([new SimpleObject(oStoneSmall, 2,5, 1,3)], true, clRock);
 createObjectGroupsDeprecated(group, 0,
 	[avoidClasses(clWater, 0, clForest, 1, clPlayer, 60, clRock, 10, clHill, 2)],
 	scaleByMapSize(4,16), 100
 );
+
+Engine.SetProgress(73);
 
 g_Map.log("Creating metal mines");
 group = new SimpleGroup([new SimpleObject(oMetalLarge, 1,1, 0,4)], true, clMetal);
@@ -268,7 +276,7 @@ createObjectGroupsDeprecated(group, 0,
 	scaleByMapSize(4,16), 100
 );
 
-Engine.SetProgress(85);
+Engine.SetProgress(76);
 
 g_Map.log("Creating small decorative rocks");
 group = new SimpleGroup(
@@ -280,7 +288,7 @@ createObjectGroupsDeprecated(
 	avoidClasses(clWater, 0, clForest, 0, clPlayer, 0, clHill, 0),
 	scaleByMapSize(16, 262), 50
 );
-Engine.SetProgress(90);
+Engine.SetProgress(79);
 
 g_Map.log("Creating large decorative rocks");
 group = new SimpleGroup(
@@ -292,6 +300,7 @@ createObjectGroupsDeprecated(
 	avoidClasses(clWater, 0, clForest, 0, clPlayer, 0, clHill, 0),
 	scaleByMapSize(8, 131), 50
 );
+Engine.SetProgress(82);
 
 g_Map.log("Creating deer");
 group = new SimpleGroup(
@@ -302,6 +311,7 @@ createObjectGroupsDeprecated(group, 0,
 	avoidClasses(clWater, 0, clForest, 0, clPlayer, 50, clHill, 0, clFood, 5),
 	6 * numPlayers, 50
 );
+Engine.SetProgress(85);
 
 g_Map.log("Creating sheep");
 group = new SimpleGroup(
@@ -312,6 +322,7 @@ createObjectGroupsDeprecated(group, 0,
 	avoidClasses(clWater, 0, clForest, 0, clPlayer, 50, clHill, 0, clFood, 20),
 	3 * numPlayers, 50
 );
+Engine.SetProgress(88);
 
 g_Map.log("Creating berry bush");
 group = new SimpleGroup(
@@ -322,6 +333,7 @@ createObjectGroupsDeprecated(group, 0,
 	avoidClasses(clWater, 6, clForest, 0, clPlayer, 45, clHill, 1, clFood, 10),
 	randIntInclusive(1, 4) * numPlayers + 2, 50
 );
+Engine.SetProgress(92);
 
 g_Map.log("Creating boar");
 group = new SimpleGroup(
@@ -338,6 +350,20 @@ createStragglerTrees(
 	avoidClasses(clWater, 1, clForest, 1, clHill, 1, clPlayer, 38, clMetal, 6, clRock, 6),
 	clForest,
 	stragglerTrees);
+
+for (let playerPosition of playerPositions) {
+  const playerArea = new Area(new ODiskPlacer(40, playerPosition).place(avoidClasses(clWater, 1, clForest, 1, clHill, 1, clMetal, 6, clRock, 6, clPlayer, 15, clFood, 4)));
+
+  for (let templateName of [oPoplar, oPalm]) {
+    createObjectGroupsByAreas(
+      new SimpleGroup([new SimpleObject(templateName, 1, 1, 0, 3)], true, clForest),
+      0,
+      new NullConstraint(),
+      25, 400,
+      [playerArea]
+    );
+  }
+}
 
 g_Map.log("Creating small grass tufts");
 group = new SimpleGroup(
