@@ -101,13 +101,13 @@ for (let i = 0; i < numPlayers; ++i)
   const angle = playerAngles[i];
   const lakeRadius = 40;
   const lakePosition = Vector2D.add(playerPosition, new Vector2D(lakeRadius, 0).rotate(-angle)).round();
-  const lakeSize = Math.round(scaleByMapSize(40, 60) - (numPlayers - 2) * 5.4);
+  const lakeSize = Math.round(scaleByMapSize(40, 70) - (numPlayers - 2) * 6);
 
   createArea(
     new ChainPlacer(
       3,
-      6,
-      Math.floor(scaleByMapSize(20, 45)),
+      4,
+      45,
       Infinity,
       lakePosition,
       lakeRadius - 5,
@@ -135,7 +135,7 @@ for (let i = 0; i < numPlayers; ++i)
   const sideLakePosition = Vector2D.add(mapCenter, new Vector2D(sideLakeRadius, 0).rotate(-angle - offsetAngle)).round();
 
   if (mapSize > 128) {
-    const sideMinesRadius = 48 - (numPlayers - 2);
+    const sideMinesRadius = lakeSize + 10;
     const sideStonePosition = Vector2D.add(sideLakePosition, new Vector2D(sideMinesRadius, 0).rotate(-angle + -offsetAngle + Math.PI - Math.PI/5)).round();
     const sideMetalPosition = Vector2D.add(sideLakePosition, new Vector2D(sideMinesRadius, 0).rotate(-angle + -offsetAngle + Math.PI + Math.PI/5)).round();
 
@@ -159,12 +159,12 @@ for (let i = 0; i < numPlayers; ++i)
   createArea(
     new ChainPlacer(
       3,
-      6,
-      Math.round(20 + (numPlayers - 2) * 9),
+      4,
+      45,
       Infinity,
       sideLakePosition,
       lakeRadius - 5,
-      [lakeSize]),
+      [lakeSize + 5]),
     [
       new SmoothElevationPainter(ELEVATION_SET, heightSeaGround, 4),
       new TileClassPainter(clWater)
