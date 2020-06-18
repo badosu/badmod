@@ -211,11 +211,19 @@ createStragglerTrees(
   [oTree1, oTree2, oTree4, oTree3],
   avoidClasses(
     clForest, 8, clHill, 1, clPlayer,
-    (currentBiome() == "generic/savanna") ? 12 : 30,
+    (currentBiome() == "generic/savanna") ? 12 : 38,
     clMetal, 6, clRock, 6, clFood, 1
   ),
   clForest,
   stragglerTrees);
+
+createBalancedPlayerStragglerTrees(
+  playerPositions,
+  [oTree1, oTree2, oTree4, oTree3],
+  avoidClasses(clForest, 8, clHill, 1, clMetal, 6, clRock, 6, clFood, 1),
+  25,
+  clForest
+)
 
 placePlayersNomad(clPlayer, avoidClasses(clForest, 1, clMetal, 4, clRock, 4, clHill, 4, clFood, 2));
 

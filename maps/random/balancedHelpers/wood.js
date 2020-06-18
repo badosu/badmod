@@ -1,3 +1,11 @@
+const fruitFlora = [
+  "gaia/flora_tree_banana",
+  "gaia/flora_tree_date_palm_fruit",
+  "gaia/flora_tree_fig",
+  "gaia/flora_tree_apple",
+  "gaia/flora_tree_olive"
+];
+
 function pickRandomCollection(collection, amount) {
   let newCollection = [];
   let dup = collection.slice();
@@ -9,6 +17,24 @@ function pickRandomCollection(collection, amount) {
   }
 
   return newCollection;
+}
+
+function createBalancedPlayerStragglerTrees(playerPositions, templateNames, constraint, treeCount, tileClass) {
+  templateNames = templateNames.filter((templateName) => fruitFlora.indexOf(templateName) < 0);
+
+  for (let playerPosition of playerPositions) {
+    const playerArea = new Area(new ODiskPlacer(38, playerPosition).place(avoidClasses(clPlayer, 12)));
+
+    for (let templateName of templateNames) {
+      createObjectGroupsByAreas(
+        new SimpleGroup([new SimpleObject(templateName, 1, 1, 0, 3)], true, tileClass),
+        0,
+        constraint,
+        Math.floor(treeCount / templateNames.length), 400,
+        [playerArea]
+      );
+    }
+  }
 }
 
 function createBalancedPlayerForests(playerPositions, constraint, tileClass)

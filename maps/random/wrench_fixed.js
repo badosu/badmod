@@ -267,6 +267,14 @@ createStragglerTrees(
   clForest,
   stragglerTrees);
 
+createBalancedPlayerStragglerTrees(
+  playerPositions,
+  [oTree1, oTree2, oTree4, oTree3],
+  avoidClasses(clForest, 8, clHill, 1, clMetal, 6, clRock, 6, clFood, 1, clWrenchHead, 2),
+  25,
+  clForest
+)
+
 Engine.SetProgress(90);
 
 placePlayersNomad(clPlayer, avoidClasses(clForest, 1, clMetal, 4, clRock, 4, clHill, 4, clFood, 2, clWrenchHead, 10));
