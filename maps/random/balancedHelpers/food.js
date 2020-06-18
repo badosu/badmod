@@ -1,6 +1,6 @@
 Engine.LoadLibrary("rmbiome");
 
-const debugFood = true;
+const debugFood = false;
 
 function dWarn(message) {
   if (debugFood) {
