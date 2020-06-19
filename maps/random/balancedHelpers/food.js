@@ -11,23 +11,23 @@ function dWarn(message) {
 const balancedFoodConfig = {
   'generic/alpine': {
     placer: placeFoodTemperate,
-    initialFood: () => randBool(0.75) ? randIntInclusive(0, 12) : randIntInclusive(13, 22),
+    initialFood: () => randBool(0.65) ? randIntInclusive(0, 11) : randIntInclusive(12, 22),
   },
   'generic/mediterranean': {
     placer: placeFoodTemperate,
-    initialFood: () => randBool(0.75) ? randIntInclusive(0, 12) : randIntInclusive(13, 22),
+    initialFood: () => randBool(0.65) ? randIntInclusive(0, 11) : randIntInclusive(12, 22),
   },
   'generic/temperate': {
     placer: placeFoodTemperate,
-    initialFood: () => randBool(0.75) ? randIntInclusive(0, 12) : randIntInclusive(13, 22),
+    initialFood: () => randBool(0.65) ? randIntInclusive(0, 11) : randIntInclusive(12, 22),
   },
   'generic/autumn': {
     placer: placeFoodAutumn,
-    initialFood: () => randBool(0.75) ? randIntInclusive(0, 12) : randIntInclusive(13, 22),
+    initialFood: () => randBool(0.65) ? randIntInclusive(0, 11) : randIntInclusive(12, 22),
   },
   'generic/tropic': {
     placer: placeFoodTropic,
-    initialFood: () => randBool(0.75) ? randIntInclusive(0, 12) : randIntInclusive(13, 22),
+    initialFood: () => randBool(0.65) ? randIntInclusive(0, 11) : randIntInclusive(12, 22),
   },
   'generic/desert': {
     placer: placeFoodDesert,
@@ -35,7 +35,7 @@ const balancedFoodConfig = {
   },
   'generic/snowy': {
     placer: placeFoodSnowy,
-    initialFood: () => randIntInclusive(0, 30),
+    initialFood: () => randIntInclusive(3, 30),
     evenInitialFood: true,
   },
   'generic/savanna': {
@@ -123,7 +123,7 @@ function getFoodAmount(multiplier = 1, biomeConfig) {
     if (initialFoodAmount % 2 == 1) initialFoodAmount++;
   }
 
-  return (initialFoodAmount <= 600 && randBool(0.3)) ? 0 : initialFoodAmount * 100;
+  return initialFoodAmount * 100;
 }
 
 function placeFoodTemperate(initialFoodAmount, playerId, playerPosition, constraints, stragglerConstraints, maxBerries = 2) {
