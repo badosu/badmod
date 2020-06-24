@@ -64,7 +64,7 @@ const clBaseResource = g_Map.createTileClass();
 const clRamp = g_Map.createTileClass();
 const clWater = g_Map.createTileClass();
 
-const playerDistance = fractionToTiles(0.27);
+const playerDistance = fractionToTiles(0.29);
 const [playerIDs, playerPositions] = placeOpposingTeams(playerDistance, Math.PI / 2, center);
 const playerPlacements = [playerIDs, playerPositions];
 

@@ -71,7 +71,7 @@ var waterPosition = fractionToTiles(0.25)
 var highlandsPosition = fractionToTiles(0.75);
 
 var startAngle = randomAngle();
-const playerPlacements = placeOpposingTeams(fractionToTiles(0.2), -startAngle, mapCenter)
+const playerPlacements = placeOpposingTeams(fractionToTiles(0.25), -startAngle, mapCenter)
 const [playerIDs, playerPositions] = playerPlacements;
 
 placePlayerBases({

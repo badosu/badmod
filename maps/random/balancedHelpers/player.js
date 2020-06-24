@@ -3,7 +3,7 @@ Engine.LoadLibrary("rmgen-common");
 function getTeams() {
   const playerIDs = [];
   for (let i = 0; i < getNumPlayers(); ++i)
-    playerIDs.push(i+1);
+    playerIDs.push(i + 1);
 
   return playerIDs.reduce((obj, playerID) => {
     const teamID = g_MapSettings.PlayerData[playerID].Team;
@@ -23,35 +23,40 @@ function placeOpposingTeams(radius, startingAngle = undefined, center = undefine
 
   const teams = getTeams();
   const teamIDs = shuffleArray(Object.keys(teams));
+  const teamCount = teamIDs.length;
 
-  if (teamIDs.length > 2) {
-    warn('This map is optimized for 2 teams only');
-  }
+  if (teamCount === 1)
+    warn('This map is optimized for at least 2 teams');
+
+  const [teamPositions, teamAngles] = distributePointsOnCircle(teamIDs.length, startAngle, radius, center)
 
   let playerPositions = [];
-
-  playerPositions = playerPositions.concat(
-    placeTeam(teams[teamIDs[0]], -1, Vector2D.add(center, new Vector2D(radius - (teamIDs[0].length - 2) * 8, 0).rotate(-startAngle).round()), startAngle)
-  );
-  playerPositions = playerPositions.concat(
-    placeTeam(teams[teamIDs[1]], 1, Vector2D.add(center, new Vector2D(radius - (teamIDs[1].length - 2) * 8, 0).rotate(-startAngle + Math.PI).round()), startAngle)
-  );
-
-  return [teams[teamIDs[0]].concat(teams[teamIDs[1]]), playerPositions];
-}
-
-function placeTeam(team, orientation, pos, mapAngle) {
-  const teamSize = team.length;
-
-  if (teamSize === 1) {
-    return [pos];
+  let ids = [];
+  for (let i = 0; i < teamCount; i++) {
+    const team = teams[teamIDs[i]];
+    ids = ids.concat(team);
+    playerPositions = playerPositions.concat(placeTeam(
+      team,
+      teamCount === 1 ? center : teamPositions[i],
+      teamAngles[i]
+    ));
   }
 
-  const startAngle = Math.min(teamSize - 2, 1) * Math.PI / Math.pow(2, teamSize - 2);
+  return [ids, playerPositions];
+}
+
+// Places a team in a circle formation at a certain position
+function placeTeam(team, pos, startAngle = 0) {
+  const teamSize = team.length;
+  if (teamSize === 1)
+    return [pos];
+
+  // Make uneven sizes point to center, and even to face center
+  const orientationAngle = Math.min(teamSize - 2, 1) * Math.PI / Math.pow(2, teamSize - 2);
 
   return distributePointsOnCircle(
     teamSize,
-    orientation * startAngle + mapAngle - Math.PI/2,
+    orientationAngle + startAngle + Math.PI/2,
     22 + teamSize * 6,
     pos
   )[0];
