@@ -1,4 +1,4 @@
-global["balancedMapsCompatibilityMatcher"] = new RegExp('^0\\.19(\\.|$)', 'i');
+global["balancedMapsCompatibilityMatcher"] = new RegExp('^0\\.20(\\.|$)', 'i');
 
 autociv_patchApplyN("hasSameMods", function (target, that, args)
 {
