@@ -465,19 +465,19 @@ function placeFoodGiraffes(initialFoodAmount, playerId, playerPosition, constrai
     warn('Player ' + playerId + ' ended up with additional ' + Math.abs(remainingFood) + ' food');
 }
 
-function createBadFood(constraints) {
+function createBadFood(constraints, multiplier = 2) {
   // Separate for eles generation farther
   let huntGenDistance = oMainHuntableAnimal == 'gaia/fauna_elephant_african_bush' ? 80 : 50;
 
   createFood(
     [ [new SimpleObject(oMainHuntableAnimal, 5, 7, 0, 4)] ],
-    [ 2 * numPlayers ],
+    [ multiplier * numPlayers ],
     new AndConstraint([avoidClasses(clPlayer, huntGenDistance), constraints]),
     clFood);
 
   createFood(
     [ [new SimpleObject(oSecondaryHuntableAnimal, 2, 3, 0, 2)] ],
-    [ 2 * numPlayers ],
+    [ multiplier * numPlayers ],
     new AndConstraint([avoidClasses(clPlayer, huntGenDistance), constraints]),
     clFood);
 }
