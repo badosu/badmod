@@ -46,7 +46,7 @@ function createBalancedPlayerForests(playerPositions, constraint, tileClass)
   {
     const playerPosition = playerPositions[i];
 
-    let forestArea = new Area(new AnnulusPlacer(27, 38, playerPosition).place(new NullConstraint()));
+    let forestArea = new Area(new AnnulusPlacer(26, 40, playerPosition).place(new NullConstraint()));
 
     createForestsInArea(forestArea, constraint, tileClass, treeCount, 3, Math.floor(scaleByMapSize(3, 5)), 1, forestAmount, 0);
   }

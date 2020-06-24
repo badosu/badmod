@@ -51,15 +51,15 @@ var g_Map = new RandomMap(heightLand, tMainTerrain);
 const mapSize = g_Map.getSize();
 const numPlayers = getNumPlayers();
 
-var clPlayer = g_Map.createTileClass();
-var clHill = g_Map.createTileClass();
-var clForest = g_Map.createTileClass();
-var clDirt = g_Map.createTileClass();
-var clRock = g_Map.createTileClass();
-var clMetal = g_Map.createTileClass();
-var clFood = g_Map.createTileClass();
-var clWater = g_Map.createTileClass();
-var clBaseResource = g_Map.createTileClass();
+const clPlayer = g_Map.createTileClass();
+const clHill = g_Map.createTileClass();
+const clForest = g_Map.createTileClass();
+const clDirt = g_Map.createTileClass();
+const clRock = g_Map.createTileClass();
+const clMetal = g_Map.createTileClass();
+const clFood = g_Map.createTileClass();
+const clWater = g_Map.createTileClass();
+const clBaseResource = g_Map.createTileClass();
 
 var playerPlacements = playerPlacementCircle(fractionToTiles(0.26 + (numPlayers - 2) * 0.008));
 const mapCenter = g_Map.getCenter();
@@ -335,7 +335,7 @@ createStragglerTrees(
 createBalancedPlayerStragglerTrees(
   playerPositions,
   [oTree1, oTree2, oTree4, oTree3],
-  avoidClasses(clForest, 8, clHill, 1, clMetal, 6, clRock, 6, clFood, 1, clWater, 2),
+  avoidClasses(clForest, 8, clHill, 1, clMetal, 6, clRock, 6, clFood, 1, clWater, 2, clBaseResource, 2),
   25,
   clForest
 )

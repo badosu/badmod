@@ -46,15 +46,15 @@ var g_Map = new RandomMap(heightLand, tMainTerrain);
 const mapSize = g_Map.getSize();
 const numPlayers = getNumPlayers();
 
-var clPlayer = g_Map.createTileClass();
-var clHill = g_Map.createTileClass();
-var clWrenchHead = g_Map.createTileClass();
-var clForest = g_Map.createTileClass();
-var clDirt = g_Map.createTileClass();
-var clRock = g_Map.createTileClass();
-var clMetal = g_Map.createTileClass();
-var clFood = g_Map.createTileClass();
-var clBaseResource = g_Map.createTileClass();
+const clPlayer = g_Map.createTileClass();
+const clHill = g_Map.createTileClass();
+const clWrenchHead = g_Map.createTileClass();
+const clForest = g_Map.createTileClass();
+const clDirt = g_Map.createTileClass();
+const clRock = g_Map.createTileClass();
+const clMetal = g_Map.createTileClass();
+const clFood = g_Map.createTileClass();
+const clBaseResource = g_Map.createTileClass();
 
 const wrenchScaling = 10 * (numPlayers - 2);
 const playersCircleRadius = 28 + wrenchScaling;
@@ -177,7 +177,8 @@ createBumps(avoidClasses(clPlayer, 20, clMetal, 6, clRock, 6));
 Engine.SetProgress(40);
 
 placeBalancedFood(playerPlacements,
-  avoidClasses(clHill, 1, clMetal, 4, clRock, 4, clBaseResource, 10, clFood, 10, clWrenchHead, 1)
+  avoidClasses(clHill, 1, clMetal, 4, clRock, 4, clBaseResource, 10, clFood, 10, clWrenchHead, 1),
+  1.2 - numPlayers * 0.1
 );
 
 Engine.SetProgress(45);
@@ -192,7 +193,7 @@ Engine.SetProgress(48);
 if (currentBiome() != "generic/savanna") {
   createBalancedPlayerForests(
     playerPositions,
-    avoidClasses(clForest, 6, clHill, 2, clMetal, 4, clRock, 4, clFood, 4, clWrenchHead, 4),
+    avoidClasses(clForest, 4, clHill, 2, clMetal, 4, clRock, 4, clFood, 2, clWrenchHead, 2, clBaseResource, 1),
     clForest);
 }
 
@@ -202,7 +203,7 @@ const [forestTrees, stragglerTrees] = getTreeCounts(...rBiomeTreeCount(1));
 
 createForests(
   [tMainTerrain, tForestFloor1, tForestFloor2, pForest1, pForest2],
-  avoidClasses(clPlayer, 18, clForest, 15, clHill, 1, clMetal, 6, clRock, 6, clFood, 6, clWrenchHead, 9),
+  avoidClasses(clPlayer, 18, clForest, 14, clHill, 1, clMetal, 6, clRock, 6, clFood, 6, clWrenchHead, 9),
   clForest,
   forestTrees);
 
@@ -270,7 +271,7 @@ createStragglerTrees(
 createBalancedPlayerStragglerTrees(
   playerPositions,
   [oTree1, oTree2, oTree4, oTree3],
-  avoidClasses(clForest, 8, clHill, 1, clMetal, 6, clRock, 6, clFood, 1, clWrenchHead, 2),
+  avoidClasses(clForest, 8, clHill, 1, clMetal, 6, clRock, 6, clFood, 1, clWrenchHead, 2, clBaseResource, 2),
   25,
   clForest
 )
