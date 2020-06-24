@@ -3,8 +3,19 @@ function badmod_patchModFilter()
   if (!global["getFilteredMods"])
     global["getFilteredMods"] = function(gameData) { return Engine.GetEngineInfo().mods };
 
+  // Generate with `ls maps/random/*.js | sed -r 's/(\w|\/)+_triggers.js//g' | sed -r 's/.js//g' | sed -r '/^$/d' | paste -sd "," - | sed -r "s/,/\",\"/g" | sed -r "s/^|$/\"/g"`
   if (!global["balancedMaps"])
-    global["balancedMaps"] = ['maps/random/wrench', 'maps/random/badmainland', 'maps/random/bad_hyrcanian_shores', 'maps/random/cross'];
+    global["balancedMaps"] = [
+      "maps/random/badcontinent",
+      "maps/random/bad_hyrcanian_shores",
+      "maps/random/badmainland_fixed",
+      "maps/random/badmainland",
+      "maps/random/britannic_road",
+      "maps/random/cross",
+      "maps/random/slopes",
+      "maps/random/wrench_fixed",
+      "maps/random/wrench"
+    ];
 
   function isBalancedMap(mapName) {
     return global["balancedMaps"].indexOf(mapName) > -1;
