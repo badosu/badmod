@@ -8,26 +8,28 @@ function dWarn(message) {
   }
 }
 
+const temperateInitialFood = () => randBool(0.05) ? randIntInclusive(23, 30) : randIntInclusive(0, 22);
+
 const balancedFoodConfig = {
   'generic/alpine': {
     placer: placeFoodTemperate,
-    initialFood: () => randBool(0.65) ? randIntInclusive(0, 11) : randIntInclusive(12, 22),
+    initialFood: temperateInitialFood,
   },
   'generic/mediterranean': {
     placer: placeFoodTemperate,
-    initialFood: () => randBool(0.65) ? randIntInclusive(0, 11) : randIntInclusive(12, 22),
+    initialFood: temperateInitialFood,
   },
   'generic/temperate': {
     placer: placeFoodTemperate,
-    initialFood: () => randBool(0.65) ? randIntInclusive(0, 11) : randIntInclusive(12, 22),
+    initialFood: temperateInitialFood,
   },
   'generic/autumn': {
     placer: placeFoodAutumn,
-    initialFood: () => randBool(0.65) ? randIntInclusive(0, 11) : randIntInclusive(12, 22),
+    initialFood: temperateInitialFood,
   },
   'generic/tropic': {
     placer: placeFoodTropic,
-    initialFood: () => randBool(0.65) ? randIntInclusive(0, 11) : randIntInclusive(12, 22),
+    initialFood: temperateInitialFood,
   },
   'generic/desert': {
     placer: placeFoodDesert,
