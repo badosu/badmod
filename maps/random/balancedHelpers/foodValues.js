@@ -13,7 +13,7 @@ const foodValues = {
   'gaia/fauna_muskox': 200,     // m snowy
   'gaia/fauna_walrus': 300,     // s snowy
   'gaia/fauna_tiger': 0,        // s tropic
-  'gaia/flora_bush_berry': 100, // all regular biomes
-  'gaia/flora_bush_grapes': 100, // mediterranean random occurrence
-  'gaia/flora_bush_berry_desert': 100, // desert
+  'gaia/flora_bush_berry': 200, // all regular biomes
+  'gaia/flora_bush_grapes': 200, // mediterranean random occurrence
+  'gaia/flora_bush_berry_desert': 200, // desert
 };
