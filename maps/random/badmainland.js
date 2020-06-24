@@ -115,7 +115,6 @@ placeBalancedMinerals(playerPositions);
 Engine.SetProgress(30);
 
 placeBalancedFood(playerPlacements,
-  avoidClasses(clHill, 1, clMetal, 4, clRock, 4, clFood, 10),
   avoidClasses(clHill, 1, clMetal, 4, clRock, 4, clBaseResource, 10, clFood, 10)
 );
 

@@ -121,11 +121,10 @@ if (randBool())
 else
   createMountains(tCliff, avoidClasses(clPlayer, 35, clHill, 15), clHill, scaleByMapSize(2, 11));
 
-let constraints = avoidClasses(clHill, 1, clMetal, 4, clRock, 4, clFood, 10);
-let stragglerConstraints = avoidClasses(clHill, 1, clMetal, 4, clRock, 4, clBaseResource, 10, clFood, 10);
-
 placeBalancedMinerals(playerPositions);
-placeBalancedFood(playerPlacements, constraints, stragglerConstraints);
+placeBalancedFood(playerPlacements,
+  avoidClasses(clHill, 1, clMetal, 4, clRock, 4, clBaseResource, 10, clFood, 10)
+);
 
 Engine.SetProgress(40);
 

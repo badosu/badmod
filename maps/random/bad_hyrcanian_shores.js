@@ -140,10 +140,7 @@ placeBalancedMinerals(playerPositions, mineralConstraints);
 
 Engine.SetProgress(30);
 
-const constraints = avoidClasses(clHill, 1, clMetal, 4, clRock, 4, clFood, 10);
-const stragglerConstraints = avoidClasses(clHill, 1, clMetal, 4, clRock, 4, clBaseResource, 10, clFood, 10);
-const foodMultiplier = 0.8;
-placeBalancedFood(playerPlacements, constraints, stragglerConstraints, foodMultiplier);
+placeBalancedFood(playerPlacements, avoidClasses(clHill, 1, clMetal, 4, clRock, 4, clBaseResource, 10, clFood, 10));
 
 Engine.SetProgress(40);
 

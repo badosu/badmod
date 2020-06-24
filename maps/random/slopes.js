@@ -255,10 +255,10 @@ else
 
 Engine.SetProgress(34);
 
-let constraints = avoidClasses(clHill, 1, clMetal, 4, clRock, 4, clFood, 10, clWater, 4);
-let stragglerConstraints = avoidClasses(clHill, 1, clMetal, 4, clRock, 4, clBaseResource, 10, clFood, 10, clWater, 4);
-
-placeBalancedFood(playerPlacements, constraints, stragglerConstraints, 0.5);
+placeBalancedFood(playerPlacements,
+  avoidClasses(clHill, 1, clMetal, 4, clRock, 4, clBaseResource, 10, clFood, 10, clWater, 4),
+  0.5
+);
 
 Engine.SetProgress(40);
 

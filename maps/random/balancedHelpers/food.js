@@ -66,8 +66,8 @@ function placeInitialFoodAmount(type, min, max, foodAmount, playerPosition, cons
   max = max < (foodAmount / foodValues[type]) ? max : Math.floor(foodAmount / foodValues[type]);
 
   if (type != oFruitBush) {
-    minTileBound += 4;
-    maxTileBound += 4;
+    minTileBound += 8;
+    maxTileBound += 8;
   }
 
   return placeFoodAmount(type, min, max, playerPosition, constraints, minTileBound, maxTileBound) * foodValues[type];
@@ -89,22 +89,18 @@ function placeFoodAmount(type, min, max, position, constraints, minTileBound = 1
   return amountPlaced;
 }
 
-function placeStragglerFauna(type, foodAmount, playerId, playerPosition, constraints, stragglerConstraints) {
+function placeStragglerFauna(type, foodAmount, playerId, playerPosition, constraints) {
   const foodQty = Math.floor(foodAmount / foodValues[type]);
 
-  let placedAmount;
-  if (getCivCode(playerId) == 'iber') {
-    placedAmount = placeInitialFoodAmount(type, foodQty, foodQty, foodAmount, playerPosition, constraints, 25, 27);
-  } else {
-    placedAmount = placeInitialFoodAmount(type, foodQty, foodQty, foodAmount, playerPosition, stragglerConstraints, 12, 16);
-  }
+  const [minTile, maxTile] = getCivCode(playerId) == 'iber' ? [25, 27] : [12, 16];
+  const placedAmount = placeInitialFoodAmount(type, foodQty, foodQty, foodAmount, playerPosition, constraints, minTile, maxTile);
 
   dWarn("Player " + playerId + " - placed " + type + ": " + placedAmount);
 
   return placedAmount;
 }
 
-function placeBalancedFood(playerPlacements, constraints, stragglerConstraints, multiplier = 1) {
+function placeBalancedFood(playerPlacements, constraints, multiplier = 1) {
   const biome = currentBiome() || 'generic/temperate';
   const biomeConfig = balancedFoodConfig[biome];
 
@@ -115,7 +111,7 @@ function placeBalancedFood(playerPlacements, constraints, stragglerConstraints, 
   const foodAmount = getFoodAmount(multiplier, biomeConfig);
 
   for (let i = 0; i < playerPositions.length; ++i)
-    foodPlacer(foodAmount, playerIDs[i], playerPositions[i], constraints, stragglerConstraints);
+    foodPlacer(foodAmount, playerIDs[i], playerPositions[i], constraints);
 }
 
 function getFoodAmount(multiplier = 1, biomeConfig) {
@@ -128,7 +124,7 @@ function getFoodAmount(multiplier = 1, biomeConfig) {
   return initialFoodAmount * 100;
 }
 
-function placeFoodTemperate(initialFoodAmount, playerId, playerPosition, constraints, stragglerConstraints, maxBerries = 2) {
+function placeFoodTemperate(initialFoodAmount, playerId, playerPosition, constraints, maxBerries = 2) {
   let remainingFood = initialFoodAmount;
   let remainingBerries = maxBerries;
 
@@ -137,7 +133,7 @@ function placeFoodTemperate(initialFoodAmount, playerId, playerPosition, constra
   dWarn("Assigning " + remainingFood + " food for player " + playerId);
   while (remainingFood > 0) {
     if (remainingFood <= 400) {
-      remainingFood -= placeStragglerFauna(oMainHuntableAnimal, remainingFood, playerId, playerPosition, constraints, stragglerConstraints);
+      remainingFood -= placeStragglerFauna(oMainHuntableAnimal, remainingFood, playerId, playerPosition, constraints);
     }
     else if (remainingFood <= 1000) {
       const placedAmount = placeInitialFoodAmount(oMainHuntableAnimal, 5, 5, remainingFood, playerPosition, constraints);
@@ -171,14 +167,14 @@ function placeFoodTemperate(initialFoodAmount, playerId, playerPosition, constra
   }
 }
 
-function placeFoodAutumn(initialFoodAmount, playerId, playerPosition, constraints, stragglerConstraints, maxBerries = 2) {
+function placeFoodAutumn(initialFoodAmount, playerId, playerPosition, constraints, maxBerries = 2) {
   let remainingFood = initialFoodAmount;
   let remainingBerries = maxBerries;
 
   dWarn("Assigning " + remainingFood + " food for player " + playerId);
   while (remainingFood > 0) {
     if (remainingFood <= 400) {
-      remainingFood -= placeStragglerFauna(oSecondaryHuntableAnimal, remainingFood, playerId, playerPosition, constraints, stragglerConstraints);
+      remainingFood -= placeStragglerFauna(oSecondaryHuntableAnimal, remainingFood, playerId, playerPosition, constraints);
     }
     else if (remainingFood <= 800) {
       const placedAmount = placeInitialFoodAmount(oMainHuntableAnimal, 5, 5, remainingFood, playerPosition, constraints);
@@ -211,14 +207,14 @@ function placeFoodAutumn(initialFoodAmount, playerId, playerPosition, constraint
   }
 }
 
-function placeFoodDesert(initialFoodAmount, playerId, playerPosition, constraints, stragglerConstraints, maxBerries = 2) {
+function placeFoodDesert(initialFoodAmount, playerId, playerPosition, constraints, maxBerries = 2) {
   let remainingFood = initialFoodAmount;
   let remainingBerries = maxBerries;
 
   dWarn("Assigning " + remainingFood + " food for player " + playerId);
   while (remainingFood > 0) {
     if (remainingFood <= 400) {
-      remainingFood -= placeStragglerFauna(oSecondaryHuntableAnimal, remainingFood, playerId, playerPosition, constraints, stragglerConstraints);
+      remainingFood -= placeStragglerFauna(oSecondaryHuntableAnimal, remainingFood, playerId, playerPosition, constraints);
     }
     else if (remainingFood <= 1000) {
       const placedAmount = placeInitialFoodAmount(oSecondaryHuntableAnimal, 5, 7, remainingFood, playerPosition, constraints);
@@ -251,14 +247,14 @@ function placeFoodDesert(initialFoodAmount, playerId, playerPosition, constraint
   }
 }
 
-function placeFoodTropic(initialFoodAmount, playerId, playerPosition, constraints, stragglerConstraints, maxBerries = 2) {
+function placeFoodTropic(initialFoodAmount, playerId, playerPosition, constraints, maxBerries = 2) {
   let remainingFood = initialFoodAmount;
   let remainingBerries = maxBerries;
 
   dWarn("Assigning " + remainingFood + " food for player " + playerId);
   while (remainingFood > 0) {
     if (remainingFood <= 350) {
-      remainingFood -= placeStragglerFauna(oMainHuntableAnimal, remainingFood, playerId, playerPosition, constraints, stragglerConstraints);
+      remainingFood -= placeStragglerFauna(oMainHuntableAnimal, remainingFood, playerId, playerPosition, constraints);
     }
     else if (remainingFood <= 800) {
       let placedAmount = 0
@@ -297,14 +293,14 @@ function placeFoodTropic(initialFoodAmount, playerId, playerPosition, constraint
   }
 }
 
-function placeFoodSnowy(initialFoodAmount, playerId, playerPosition, constraints, stragglerConstraints, maxBerries = 2) {
+function placeFoodSnowy(initialFoodAmount, playerId, playerPosition, constraints, maxBerries = 2) {
   let remainingFood = initialFoodAmount;
   let remainingBerries = maxBerries;
 
   dWarn("Assigning " + remainingFood + " food for player " + playerId);
   while (remainingFood > 0) {
     if (remainingFood <= 400) {
-      remainingFood -= placeStragglerFauna(oMainHuntableAnimal, remainingFood, playerId, playerPosition, constraints, stragglerConstraints);
+      remainingFood -= placeStragglerFauna(oMainHuntableAnimal, remainingFood, playerId, playerPosition, constraints);
     }
     else if (remainingFood <= 800) {
       const placedAmount = placeInitialFoodAmount(oSecondaryHuntableAnimal, 2, 2, remainingFood, playerPosition, constraints);
@@ -337,14 +333,14 @@ function placeFoodSnowy(initialFoodAmount, playerId, playerPosition, constraints
   }
 }
 
-function placeFoodSavanna(initialFoodAmount, playerId, playerPosition, constraints, stragglerConstraints) {
+function placeFoodSavanna(initialFoodAmount, playerId, playerPosition, constraints) {
   if (oMainHuntableAnimal == 'gaia/fauna_elephant_african_bush') {
-    placeFoodEles(initialFoodAmount, playerId, playerPosition, constraints, stragglerConstraints);
+    placeFoodEles(initialFoodAmount, playerId, playerPosition, constraints);
 
     return;
   }
   else if (oMainHuntableAnimal == 'gaia/fauna_giraffe') {
-    placeFoodGiraffes(initialFoodAmount, playerId, playerPosition, stragglerConstraints);
+    placeFoodGiraffes(initialFoodAmount, playerId, playerPosition);
 
     return;
   }
@@ -355,7 +351,7 @@ function placeFoodSavanna(initialFoodAmount, playerId, playerPosition, constrain
   dWarn("Assigning " + remainingFood + " food for player " + playerId);
   while (remainingFood > 0) {
     if (remainingFood <= 400) {
-      remainingFood -= placeStragglerFauna(oSecondaryHuntableAnimal, remainingFood, playerId, playerPosition, constraints, stragglerConstraints);
+      remainingFood -= placeStragglerFauna(oSecondaryHuntableAnimal, remainingFood, playerId, playerPosition, constraints);
     }
     else if (remainingFood <= 800) {
       const placedAmount = placeInitialFoodAmount(oSecondaryHuntableAnimal, 5, 5, remainingFood, playerPosition, constraints);
@@ -389,14 +385,14 @@ function placeFoodSavanna(initialFoodAmount, playerId, playerPosition, constrain
   }
 }
 
-function placeFoodEles(initialFoodAmount, playerId, playerPosition, constraints, stragglerConstraints) {
+function placeFoodEles(initialFoodAmount, playerId, playerPosition, constraints) {
   let remainingFood = initialFoodAmount;
   let remainingBerries = 2;
 
   dWarn("Assigning " + remainingFood + " food for player " + playerId);
   while (remainingFood > 0) {
     if (remainingFood <= 400) {
-      remainingFood -= placeStragglerFauna(oSecondaryHuntableAnimal, remainingFood, playerId, playerPosition, constraints, stragglerConstraints);
+      remainingFood -= placeStragglerFauna(oSecondaryHuntableAnimal, remainingFood, playerId, playerPosition, constraints);
     }
     else if (remainingFood <= 800) {
       const placedAmount = placeInitialFoodAmount(oSecondaryHuntableAnimal, 5, 5, remainingFood, playerPosition, constraints);
@@ -429,14 +425,14 @@ function placeFoodEles(initialFoodAmount, playerId, playerPosition, constraints,
   }
 }
 
-function placeFoodGiraffes(initialFoodAmount, playerId, playerPosition, constraints, stragglerConstraints) {
+function placeFoodGiraffes(initialFoodAmount, playerId, playerPosition, constraints) {
   let remainingFood = initialFoodAmount;
   let remainingBerries = 2;
 
   dWarn("Assigning " + remainingFood + " food for player " + playerId);
   while (remainingFood > 0) {
     if (remainingFood <= 500) {
-      remainingFood -= placeStragglerFauna(oSecondaryHuntableAnimal, remainingFood, playerId, playerPosition, constraints, stragglerConstraints);
+      remainingFood -= placeStragglerFauna(oSecondaryHuntableAnimal, remainingFood, playerId, playerPosition, constraints);
     }
     else if (remainingFood <= 1400) {
       const placedAmount = placeInitialFoodAmount(oSecondaryHuntableAnimal, 5, 6, remainingFood, playerPosition, constraints);

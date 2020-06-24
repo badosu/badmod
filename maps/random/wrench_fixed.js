@@ -176,9 +176,9 @@ createBumps(avoidClasses(clPlayer, 20, clMetal, 6, clRock, 6));
 
 Engine.SetProgress(40);
 
-let constraints = avoidClasses(clHill, 1, clMetal, 4, clRock, 4, clFood, 10, clWrenchHead, 1);
-let stragglerConstraints = avoidClasses(clHill, 1, clMetal, 4, clRock, 4, clBaseResource, 10, clFood, 10, clWrenchHead, 1);
-placeBalancedFood(playerPlacements, constraints, stragglerConstraints);
+placeBalancedFood(playerPlacements,
+  avoidClasses(clHill, 1, clMetal, 4, clRock, 4, clBaseResource, 10, clFood, 10, clWrenchHead, 1)
+);
 
 Engine.SetProgress(45);
 

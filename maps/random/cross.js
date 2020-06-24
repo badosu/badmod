@@ -180,10 +180,9 @@ for (let i = 0; i < numPlayers; ++i)
   Engine.SetProgress(20 + 2 * i);
 }
 
-const constraints = avoidClasses(clHill, 1, clMetal, 4, clRock, 4, clFood, 10, clWater, 2);
-const stragglerConstraints = avoidClasses(clHill, 1, clMetal, 4, clRock, 4, clBaseResource, 10, clFood, 10, clWater, 2);
+const constraints = avoidClasses(clHill, 1, clMetal, 4, clRock, 4, clBaseResource, 10, clFood, 10, clWater, 2);
 const foodMultiplier = 0.5; // Fishing is map dynamic
-placeBalancedFood(playerPlacements, constraints, stragglerConstraints, foodMultiplier);
+placeBalancedFood(playerPlacements, constraints, constraints, foodMultiplier);
 
 Engine.SetProgress(35);
 
