@@ -188,7 +188,8 @@ if (currentBiome() != "generic/savanna") {
   createBalancedPlayerForests(
     playerPositions,
     avoidClasses(clForest, 4, clHill, 2, clMetal, 4, clRock, 4, clFood, 2, clWrenchHead, 2, clBaseResource, 1),
-    clForest);
+    clForest, 4 - Math.round((numPlayers - 2) / 4), 39 - numPlayers * 2
+  );
 }
 
 Engine.SetProgress(50);
@@ -266,7 +267,7 @@ createBalancedPlayerStragglerTrees(
   playerPositions,
   [oTree1, oTree2, oTree4, oTree3],
   avoidClasses(clForest, 8, clHill, 1, clMetal, 6, clRock, 6, clFood, 1, clWrenchHead, 2, clBaseResource, 2),
-  25,
+  25 - numPlayers,
   clForest
 )
 

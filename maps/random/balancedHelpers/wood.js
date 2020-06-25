@@ -37,18 +37,17 @@ function createBalancedPlayerStragglerTrees(playerPositions, templateNames, cons
   }
 }
 
-function createBalancedPlayerForests(playerPositions, constraint, tileClass)
+function createBalancedPlayerForests(playerPositions, constraint, tileClass, forestAmount, treeCount)
 {
-  let treeCount = randIntInclusive(25, 35);
-  let forestAmount = randIntInclusive(3, 4);
-
+  treeCount = treeCount !== undefined ? treeCount : randIntInclusive(25, 35);
+  forestAmount = forestAmount !== undefined ? forestAmount : randIntInclusive(3, 4);
   for (let i = 0; i < playerPositions.length; ++i)
   {
     const playerPosition = playerPositions[i];
 
-    let forestArea = new Area(new AnnulusPlacer(26, 40, playerPosition).place(new NullConstraint()));
+    let forestArea = new Area(new AnnulusPlacer(28, 40, playerPosition).place(new NullConstraint()));
 
-    createForestsInArea(forestArea, constraint, tileClass, treeCount, 3, Math.floor(scaleByMapSize(3, 5)), 1, forestAmount, 0);
+    createForestsInArea(forestArea, constraint, tileClass, treeCount, 3, Math.floor(scaleByMapSize(3, 4)), 1, forestAmount, 0);
   }
 }
 /**
