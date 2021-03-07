@@ -144,7 +144,7 @@ for (let i = 0; i < numPlayers; ++i)
       0,
       avoidClasses(clForest, 10, clWater, 3),
       1, 400,
-      [new Area(new DiskPlacer(2, sideStonePosition).place())]
+      [new Area(new DiskPlacer(2, sideStonePosition).place(new NullConstraint()))]
     );
 
     createObjectGroupsByAreas(
@@ -152,7 +152,7 @@ for (let i = 0; i < numPlayers; ++i)
       0,
       avoidClasses(clForest, 10, clWater, 3, clRock, 4),
       1, 400,
-      [new Area(new DiskPlacer(3, sideMetalPosition).place())]
+      [new Area(new DiskPlacer(3, sideMetalPosition).place(new NullConstraint()))]
     );
   }
 

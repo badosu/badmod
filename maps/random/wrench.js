@@ -100,7 +100,7 @@ for (let i = 0; i < numPlayers; ++i) {
   const minesRadius = playersCircleRadius + numPlayers * 3 + minesVariation;
   const minesPoint = new Vector2D(minesRadius).rotate(- playerAngle - offsetAngle);
   const minesArea = new Area(
-    new DiskPlacer(2.2, Vector2D.add(mapCenter, minesPoint).round()).place()
+    new DiskPlacer(2.2, Vector2D.add(mapCenter, minesPoint).round()).place(new NullConstraint())
   );
 
   createObjectGroupsByAreas(
@@ -138,7 +138,7 @@ for (let i = 0; i < numPlayers; ++i) {
       0,
       avoidClasses(clForest, 6, clHill, 7),
       1, 400,
-      [new Area(new DiskPlacer(3, Vector2D.add(mapCenter, new Vector2D(fractionToTiles(0.42), 0).rotate(- playerAngle + offsetAngle / 3)).round()).place())]
+      [new Area(new DiskPlacer(3, Vector2D.add(mapCenter, new Vector2D(fractionToTiles(0.42), 0).rotate(- playerAngle + offsetAngle / 3)).round()).place(new NullConstraint()))]
     );
 
     createObjectGroupsByAreas(
@@ -146,7 +146,7 @@ for (let i = 0; i < numPlayers; ++i) {
       0,
       avoidClasses(clForest, 6, clHill, 7),
       1, 400,
-      [new Area(new DiskPlacer(3, Vector2D.add(mapCenter, new Vector2D(fractionToTiles(0.42), 0).rotate(- playerAngle - offsetAngle / 3)).round()).place())]
+      [new Area(new DiskPlacer(3, Vector2D.add(mapCenter, new Vector2D(fractionToTiles(0.42), 0).rotate(- playerAngle - offsetAngle / 3)).round()).place(new NullConstraint()))]
     );
   }
 
