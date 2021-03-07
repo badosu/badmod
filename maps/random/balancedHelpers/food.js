@@ -131,18 +131,23 @@ function getFoodAmount(multiplier = 1, biomeConfig) {
   return initialFoodAmount * 100;
 }
 
-function placeFoodTemperate(initialFoodAmount, playerId, playerPosition, constraints, maxBerries = 2) {
+function placeFoodTemperate(initialFoodAmount, playerId, playerPosition, constraints, maxBerries = 2, mainHunt = oMainHuntableAnimal) {
+  // Goats now are 70 food which messes everything up
+  if (currentBiome() == 'generic/alpine') {
+    mainHunt = 'gaia/fauna_sheep';
+  }
+
   let remainingFood = initialFoodAmount;
   let remainingBerries = maxBerries;
 
   dWarn("Assigning " + remainingFood + " food for player " + playerId);
   while (remainingFood > 0) {
     if (remainingFood <= 400) {
-      remainingFood -= placeStragglerFauna(oMainHuntableAnimal, remainingFood, playerId, playerPosition, constraints);
+      remainingFood -= placeStragglerFauna(mainHunt, remainingFood, playerId, playerPosition, constraints);
     } else if (remainingFood <= 1000) {
-      const placedAmount = placeInitialFoodAmount(oMainHuntableAnimal, 5, 7, remainingFood, playerPosition, constraints);
+      const placedAmount = placeInitialFoodAmount(mainHunt, 5, 7, remainingFood, playerPosition, constraints);
       remainingFood -= placedAmount;
-      dWarn("Player " + playerId + " - placed " + oMainHuntableAnimal + ": " + placedAmount);
+      dWarn("Player " + playerId + " - placed " + mainHunt + ": " + placedAmount);
     }
     else {
       if (remainingBerries > 0 && randBool()) {

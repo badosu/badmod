@@ -6,7 +6,7 @@ const foodValues = {
   'gaia/fauna_gazelle': 100,    // s savanna, s desert
   'gaia/fauna_camel': 200,      // m desert
   'gaia/fauna_peacock': 50,     // m tropical
-  'gaia/fauna_goat': 100,       // m alpine
+  'gaia/fauna_goat': 70,       // m alpine
   'gaia/fauna_deer': 100,       // m alpine, m autumn, m mediterranean, m temperate
   'gaia/fauna_sheep': 100,      // s alpine, s mediterranean, s temperate
   'gaia/fauna_rabbit': 50,      // s autumn
