@@ -130,7 +130,7 @@ for (let i = 0; i < numPlayers; ++i)
     0,
     stayClasses(clWater, 3),
     1, 400,
-    [new Area(new ODiskPlacer(3, Vector2D.add(playerPositions[i], new Vector2D(scaleByMapSize(46, 90)).rotate(startAngle - Math.PI / 2))).place())]
+    [new Area(new DiskPlacer(3, Vector2D.add(playerPositions[i], new Vector2D(scaleByMapSize(46, 90)).rotate(startAngle - Math.PI / 2))).place())]
   );
   Engine.SetProgress(20 + i);
 }
@@ -349,7 +349,7 @@ createStragglerTrees(
 	stragglerTrees);
 
 for (let playerPosition of playerPositions) {
-  const playerArea = new Area(new ODiskPlacer(40, playerPosition).place(avoidClasses(clWater, 1, clForest, 1, clHill, 1, clMetal, 6, clRock, 6, clPlayer, 15, clFood, 4)));
+  const playerArea = new Area(new DiskPlacer(40, playerPosition).place(avoidClasses(clWater, 1, clForest, 1, clHill, 1, clMetal, 6, clRock, 6, clPlayer, 15, clFood, 4)));
 
   for (let templateName of [oPoplar, oPalm]) {
     createObjectGroupsByAreas(

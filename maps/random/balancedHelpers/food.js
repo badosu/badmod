@@ -1,6 +1,6 @@
 Engine.LoadLibrary("rmbiome");
 
-const debugFood = false;
+const debugFood = true;
 
 function dWarn(message) {
   if (debugFood) {
@@ -70,7 +70,7 @@ function placeInitialFoodAmount(type, min, max, foodAmount, playerPosition, cons
     constraints = new AndConstraint([constraints, avoidClasses(clPlayer, minTileBound - 6)]);
   }
 
-  return placeFoodAmount(type, min, limitQtyForAmount(foodAmount, type, max), playerPosition, constraints, minTileBound, maxTileBound) * foodValues[type];
+  return placeFoodAmount(type, min, limitQtyForAmount(foodAmount, type, max), playerPosition, constraints, minTileBound, maxTileBound) * getFoodValue(type);
 }
 
 function placeFoodAmount(type, min, max, position, constraints, minTileBound = 17, maxTileBound = 25) {
@@ -90,7 +90,7 @@ function placeFoodAmount(type, min, max, position, constraints, minTileBound = 1
 }
 
 function placeStragglerFauna(type, foodAmount, playerId, playerPosition, constraints) {
-  const foodQty = Math.floor(foodAmount / foodValues[type]);
+  const foodQty = Math.floor(foodAmount / getFoodValue(type));
   const [minTile, maxTile] = getCivCode(playerId) == 'iber' ? [21, 23] : [8, 12];
   const placedAmount = placeInitialFoodAmount(type, foodQty, foodQty, foodAmount, playerPosition, constraints, minTile, maxTile);
 
@@ -428,5 +428,5 @@ function createBadFood(constraints, multiplier = 2) {
 }
 
 function limitQtyForAmount(foodAmount, type, max) {
-  return Math.min(max, Math.floor(foodAmount / foodValues[type]));
+  return Math.min(max, Math.floor(foodAmount / getFoodValue(type)));
 }

@@ -118,7 +118,7 @@ for (let i = 0; i < numPlayers; ++i)
     ],
     avoidClasses(clPlayer, 25));
 
-  let lakeArea = new Area(new ODiskPlacer(30, lakePosition).place(new NullConstraint()));
+  let lakeArea = new Area(new DiskPlacer(30, lakePosition).place(new NullConstraint()));
   let fish = new SimpleGroup(
     [new SimpleObject(oFish, 2, 2, 0, 2)],
     true,
@@ -144,7 +144,7 @@ for (let i = 0; i < numPlayers; ++i)
       0,
       avoidClasses(clForest, 10, clWater, 3),
       1, 400,
-      [new Area(new ODiskPlacer(2, sideStonePosition).place())]
+      [new Area(new DiskPlacer(2, sideStonePosition).place())]
     );
 
     createObjectGroupsByAreas(
@@ -152,7 +152,7 @@ for (let i = 0; i < numPlayers; ++i)
       0,
       avoidClasses(clForest, 10, clWater, 3, clRock, 4),
       1, 400,
-      [new Area(new ODiskPlacer(3, sideMetalPosition).place())]
+      [new Area(new DiskPlacer(3, sideMetalPosition).place())]
     );
   }
 
@@ -171,7 +171,7 @@ for (let i = 0; i < numPlayers; ++i)
     ],
     avoidClasses(clPlayer, 25, clRock, 5, clMetal, 5));
 
-  const sideLakeArea = new Area(new ODiskPlacer(35, sideLakePosition).place(stayClasses(clWater, 1)));
+  const sideLakeArea = new Area(new DiskPlacer(35, sideLakePosition).place(stayClasses(clWater, 1)));
   createObjectGroupsByAreas(fish, 0,
     new AndConstraint([avoidClasses(clFood, 10), stayClasses(clWater, 8)]),
     randIntInclusive(7, 10), 400, [sideLakeArea]

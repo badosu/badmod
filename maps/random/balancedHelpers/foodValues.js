@@ -13,7 +13,21 @@ const foodValues = {
   'gaia/fauna_muskox': 200,     // m snowy
   'gaia/fauna_walrus': 300,     // s snowy
   'gaia/fauna_tiger': 0,        // s tropic
-  'gaia/flora_bush_berry': 200, // all regular biomes
-  'gaia/flora_bush_grapes': 200, // mediterranean random occurrence
-  'gaia/flora_bush_berry_desert': 200, // desert
+  'gaia/fruit/berry_': 200,     // all regular biomes
 };
+
+function getFoodValue(template) {
+  let foodValue = foodValues[template];
+  dWarn('get: ' + template);
+
+  if (foodValue)
+    return foodValue;
+
+  for (let foodtemp in foodValues)
+    if (template.startsWith(foodtemp))
+      return foodValues[foodtemp];
+
+  dWarn('miss: ' + template);
+
+  return null;
+}

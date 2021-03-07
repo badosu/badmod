@@ -113,7 +113,7 @@ Engine.SetProgress(20);
 
 for (let i = 0; i < numPlayers; ++i) {
 	let playerClass = clPlayers[i];
-	surroundingPlayersAreas[i] = createArea(new ODiskPlacer(surroundingPlayerAreaMax, playerPositions[1][i]), null, avoidClasses(playerClass, surroundingPlayerAreaMin));
+	surroundingPlayersAreas[i] = createArea(new DiskPlacer(surroundingPlayerAreaMax, playerPositions[1][i]), null, avoidClasses(playerClass, surroundingPlayerAreaMin));
 }
 Engine.SetProgress(30);
 

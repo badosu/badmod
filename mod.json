@@ -1,9 +1,9 @@
 {
 	"name": "balanced-maps",
-	"version": "0.20.0",
+	"version": "0.21.0",
 	"label": "Balanced maps",
 	"description": "A collection of balanced maps.",
-	"dependencies": ["0ad=0.0.23"],
+	"dependencies": ["0ad=0.0.24"],
 	"url": "https://github.com/badosu/badmod",
 	"type": "maps"
 }

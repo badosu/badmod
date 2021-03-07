@@ -1,11 +1,3 @@
-const fruitFlora = [
-  "gaia/flora_tree_banana",
-  "gaia/flora_tree_date_palm_fruit",
-  "gaia/flora_tree_fig",
-  "gaia/flora_tree_apple",
-  "gaia/flora_tree_olive"
-];
-
 function pickRandomCollection(collection, amount) {
   let newCollection = [];
   let dup = collection.slice();
@@ -20,10 +12,10 @@ function pickRandomCollection(collection, amount) {
 }
 
 function createBalancedPlayerStragglerTrees(playerPositions, templateNames, constraint, treeCount, tileClass) {
-  templateNames = templateNames.filter((templateName) => fruitFlora.indexOf(templateName) < 0);
+  templateNames = templateNames.filter((templateName) => !templateName.startsWith('gaia/fruit/'));
 
   for (let playerPosition of playerPositions) {
-    const playerArea = new Area(new ODiskPlacer(38, playerPosition).place(avoidClasses(clPlayer, 12)));
+    const playerArea = new Area(new DiskPlacer(38, playerPosition).place(avoidClasses(clPlayer, 12)));
 
     for (let templateName of templateNames) {
       createObjectGroupsByAreas(
