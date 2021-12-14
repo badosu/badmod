@@ -1,8 +1,8 @@
 # DEPRECATED
 
-Use https://wildfiregames.com/forum/topic/53880-feldmap-a25/ for a recent balanced maps port to a25.
+Use https://github.com/0ad-matters/balanced_maps_2 for an incomplete but working port to A25.
 
-It lacks the best map imo :-) Slopes. But it works
+Use https://wildfiregames.com/forum/topic/53880-feldmap-a25/ for a recent balanced mainland port to a25.
 
 ### Credits
 
